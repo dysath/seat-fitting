@@ -55,7 +55,9 @@ class FittingServiceProvider extends ServiceProvider
 //            __DIR__ . '/Config/fitting.config.php', 'fitting.config');
 
         $this->mergeConfigFrom(
-            __DIR__ . '/Config/fitting.sidebar.php', 'package.sidebar');
+            __DIR__ . '/Config/fitting.sidebar.php',
+            'package.sidebar'
+        );
 
 //        $this->mergeConfigFrom(
 //            __DIR__ . '/Config/fitting.permissions.php', 'web.permissions');

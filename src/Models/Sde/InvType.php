@@ -9,8 +9,8 @@ namespace Denngarr\Seat\Fitting\Models\Sde;
 
 use Illuminate\Database\Eloquent\Model;
 
-class InvType extends Model {
-
+class InvType extends Model
+{
     public $timestamps = false;
 
     public $incrementing = false;
@@ -18,5 +18,4 @@ class InvType extends Model {
     protected $table = 'invTypes';
 
     protected $primaryKey = 'typeID';
-
 }
