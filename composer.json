@@ -1,0 +1,24 @@
+{
+    "name": "denngarr/seat-fitting",
+    "description": "Module to check fittings per character",
+    "type": "seat-plugin",
+    "license": "GPL-2.0",
+    "authors": [
+        {
+            "name": "Denngarr B'tarn",
+            "email": "ed.stafford@gmail.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "autoload": {
+        "psr-4": {
+            "Denngarr\\Seat\\Fitting\\": "src/"
+        }
+    },
+    "require": {
+        "eveseat/services": "^2.0",
+        "eveseat/eveapi": "^2.0",
+        "eveseat/web": "^2.0",
+        "eveseat/eseye": "0.*"
+    }
+}

@@ -1,2 +1,4 @@
 # seat-fitting
-A Fitting/Doctrine module for SeAT
+A module for SeAT handles Ship fittings and Doctrines
+
+(Under construction)
