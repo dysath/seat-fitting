@@ -12,5 +12,10 @@ Route::group([
             'uses' => 'FittingController@getFittingView',
             'middleware' => 'bouncer:fitting.view'
         ]);
+        Route::post('/postfitting', [
+            'as'   => 'fitting.postFitting',
+            'uses' => 'FittingController@postFitting',
+            'middleware' => 'bouncer:fitting.view'
+        ]);
     });
 });

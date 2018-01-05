@@ -5,6 +5,7 @@ namespace Denngarr\Seat\Fitting\Http\Controllers;
 use Illuminate\Http\Request;
 use GuzzleHttp\Client;
 use Seat\Web\Http\Controllers\Controller;
+use Denngarr\Seat\Fitting\Validation\Fitting;
 use Denngarr\Seat\Fitting\Models\Sde\InvType;
 use Denngarr\Seat\Fitting\Models\Sde\DgmTypeAttributes;
 
@@ -80,6 +81,67 @@ class FittingController extends Controller
     public function getFittingView()
     {
         return view('fitting::fitting');
+    }
+
+    public function postFitting(Fitting $request)
+    {
+        $jsfit = [];
+        $eft = $request->input('eftfitting');
+
+        $data = explode("\n\n", $eft);
+
+        $lowslot = array_filter(explode("\n", $data[0]));
+        $midslot = array_filter(explode("\n", $data[1]));
+        $highslot = array_filter(explode("\n", $data[2]));
+        $rigs = array_filter(explode("\n", $data[3]));
+        $drones = array_filter(explode("\n", $data[4]));
+
+        // get shipname of first line by removing brackets
+        list($jsfit['shipname'], $jsfit['fitname']) = explode(", ", substr(array_shift($lowslot), 1, -1));
+        
+        $index=0;
+        foreach ($lowslot as $slot) {
+            $module = explode(",", $slot);
+            $item = InvType::where('typeName', $module[0])->first();
+            $jsfit['LoSlot'.$index]['id'] = $item->typeID;
+            $jsfit['LoSlot'.$index]['name'] = $module[0];
+            $index++;
+        }
+        
+        $index=0;
+        foreach ($midslot as $slot) {
+            $module = explode(",", $slot);
+            $item = InvType::where('typeName', $module[0])->first();
+            $jsfit['MedSlot'.$index]['id'] = $item->typeID;
+            $jsfit['MedSlot'.$index]['name'] = $module[0];
+            $index++;
+        }
+        
+        $index=0;
+        foreach ($highslot as $slot) {
+            $module = explode(",", $slot);
+            $item = InvType::where('typeName', $module[0])->first();
+            $jsfit['HiSlot'.$index]['id'] = $item->typeID;
+            $jsfit['HiSlot'.$index]['name'] = $module[0];
+            $index++;
+        }
+        
+        $index=0;
+        foreach ($rigs as $slot) {
+            $item = InvType::where('typeName', $slot)->first();
+            $jsfit['RigSlot'.$index]['id'] = $item->typeID;
+            $jsfit['RigSlot'.$index]['name'] = $slot;
+            $index++;
+        }
+        
+        foreach ($drones as $slot) {
+            list($drone, $qty) = explode(" x", $slot);
+            $item = InvType::where('typeName', $drone)->first();
+            $jsfit['dronebay'][$item->typeID]['name'] = $drone;
+            $jsfit['dronebay'][$item->typeID]['qty'] = $qty;
+        }
+
+        return(json_encode($jsfit));
     }
 
     public function calculate($fitting)

@@ -1,4 +1,2 @@
-# seat-fitting
-A module for SeAT handles Ship fittings and Doctrines
-
-(Under construction)
+# seat-srp
+A module for SeAT that tracks SRP requests
