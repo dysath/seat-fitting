@@ -2,6 +2,7 @@
 
 namespace Denngarr\Seat\Fitting\Http\Controllers;
 
+use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use GuzzleHttp\Client;
 use Seat\Web\Http\Controllers\Controller;
@@ -142,6 +143,12 @@ class FittingController extends Controller
         }
 
         return(json_encode($jsfit));
+    }
+
+    public function postSkills(Fitting $request)
+    {
+        $eft = $request->input('eftfitting');
+        return $this->calculate($eft);
     }
 
     public function calculate($fitting)
@@ -305,7 +312,7 @@ class FittingController extends Controller
 
         foreach ($fitsplit as $key => $line) {
             // split line to get charge
-            $linesplit = explode(", ", $line);
+            $linesplit = explode(",", $line);
 
             if (isset($linesplit[1])) {
                 $fit_all_items[] = $linesplit[1];
@@ -331,6 +338,7 @@ class FittingController extends Controller
     private function convertToTypeIDs($items)
     {
         foreach ($items as $key => $item) {
+            $type = InvType::where('typeName', $item)->first();
             $items[$key] = InvType::where('typeName', $item)->first()->id;
         }
 

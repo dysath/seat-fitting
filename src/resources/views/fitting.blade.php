@@ -90,6 +90,19 @@
     <div class="box box-primary box-solid">
         <div class="box-header"><h3 class="box-title"></h3></div>
         <div class="box-body">
+            <div id="skills-window">
+            <p id="infoblox"></p>
+            <table style="width: 100%" class="table table-condensed table-striped">
+                <thead>
+                    <tr>
+                      <th>Skill Name</th>
+                      <th style="width: 80px">Level</th>
+                    </tr>
+                </thead>
+                <tbody id="skillbody">
+                </tbody>
+            </table>
+            </div>
         </div>
     </div>
 @endsection
@@ -97,6 +110,7 @@
 @push('javascript')
     <script type="application/javascript">
         $('#fitting-window').hide();
+        $('#skills-window').hide();
         $('#savefitting').hide()
 
         $('#verifyfitting').on('click', function () {
@@ -114,40 +128,77 @@
                 dataType: 'json',
                 data: eftcode,
                 timeout: 10000,
-            }).done(function (result) {
-                if (result) {
-                    $('#fitting-window').show();
-                    $('#savefitting').show()
-                    $('#middle-header').text(result['shipname'] + ', ' + result['fitname']);
-                    for (var slot in result) {
-
-                        if (slot.indexOf('HiSlot') >= 0)
-                            $('#highSlots').find('tbody').append(
-                                "<tr><td><img src='https://image.eveonline.com/Type/" + result[slot].id + "_32.png' height='16' />" + result[slot].name + "</td></tr>");
-
-                        if (slot.indexOf('MedSlot') >= 0)
-                            $('#midSlots').find('tbody').append(
-                                "<tr><td><img src='https://image.eveonline.com/Type/" + result[slot].id + "_32.png' height='16' />" + result[slot].name + "</td></tr>");
-
-                        if (slot.indexOf('LoSlot') >= 0)
-                            $('#lowSlots').find('tbody').append(
-                                "<tr><td><img src='https://image.eveonline.com/Type/" + result[slot].id + "_32.png' height='16' />" + result[slot].name + "</td></tr>");
-
-                        if (slot.indexOf('RigSlot') >= 0)
-                            $('#rigs').find('tbody').append(
-                                "<tr><td><img src='https://image.eveonline.com/Type/" + result[slot].id + "_32.png' height='16' />" + result[slot].name + "</td></tr>");
-
-                        if (slot.indexOf('dronebay') >= 0) {
-                            for (item in result[slot])
-                                $('#drones').find('tbody').append(
-                                    "<tr><td><img src='https://image.eveonline.com/Type/" + item + "_32.png' height='16' />" + result[slot][item].name + "</td><td>" + result[slot][item].qty + "</td></tr>");
-                        }
-                    }
-                }
+            }).done( function (result) {
+                fillFittingWindow(result);
             }).fail(function (result) {
             });
+
+            $.ajax({
+                headers: function () {
+                },
+                url: "{{ route('fitting.postSkills') }}",
+                type: "POST",
+                dataType: 'json',
+                data: eftcode,
+                timeout: 10000,
+            }).done( function (result) {
+                fillSkillsWindow(result);
+            }).fail(function (result) {
+            });
+
         });
 
+        function fillSkillsWindow (result) {
+            if (result) {
+                $('#skills-window').show();
+                $('#skillbody').empty();
+                for (var skills in result) {
+                    skill = result[skills];
+                    levelgraph = '<tr><td>'+skill.typeName+'</td><td><table id="skilllevel" style="background-color: black; width: 64px; height: 14px; border: 2px solid black; border-collapse: collapse;"><tr>';
+                    for (var i = 0; i < skill.level; i++) {
+                        levelgraph = levelgraph + '<td style="background-color: green; width: 10px; border: 2px solid black;" id="level1"></td>';
+                    }
+                    for (var i = 0; i < (5 - skill.level); i++) {
+                        levelgraph = levelgraph + '<td style="background-color: #404040; width: 10px; border: 2px solid black;" id="level1"></td>';
+                    }
+
+                    levelgraph = levelgraph + '</tr></table></td></tr>';
+                    $('#skillbody').append( levelgraph );
+                }
+            }
+        }
+
+        function fillFittingWindow (result) {
+            if (result) {
+                $('#fitting-window').show();
+                $('#savefitting').show()
+                $('#middle-header').text(result['shipname'] + ', ' + result['fitname']);
+                for (var slot in result) {
+
+                    if (slot.indexOf('HiSlot') >= 0)
+                        $('#highSlots').find('tbody').append(
+                            "<tr><td><img src='https://image.eveonline.com/Type/" + result[slot].id + "_32.png' height='24' /> " + result[slot].name + "</td></tr>");
+
+                    if (slot.indexOf('MedSlot') >= 0)
+                        $('#midSlots').find('tbody').append(
+                            "<tr><td><img src='https://image.eveonline.com/Type/" + result[slot].id + "_32.png' height='24' /> " + result[slot].name + "</td></tr>");
+
+                    if (slot.indexOf('LoSlot') >= 0)
+                        $('#lowSlots').find('tbody').append(
+                            "<tr><td><img src='https://image.eveonline.com/Type/" + result[slot].id + "_32.png' height='24' /> " + result[slot].name + "</td></tr>");
+
+                    if (slot.indexOf('RigSlot') >= 0)
+                        $('#rigs').find('tbody').append(
+                            "<tr><td><img src='https://image.eveonline.com/Type/" + result[slot].id + "_32.png' height='24' /> " + result[slot].name + "</td></tr>");
+
+                    if (slot.indexOf('dronebay') >= 0) {
+                        for (item in result[slot])
+                            $('#drones').find('tbody').append(
+                                "<tr><td><img src='https://image.eveonline.com/Type/" + item + "_32.png' height='24' /> " + result[slot][item].name + "</td><td>" + result[slot][item].qty + "</td></tr>");
+                    }
+                }
+            }
+        }
 
     </script>
 @endpush

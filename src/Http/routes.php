@@ -17,5 +17,10 @@ Route::group([
             'uses' => 'FittingController@postFitting',
             'middleware' => 'bouncer:fitting.view'
         ]);
+        Route::post('/postskills', [
+            'as'   => 'fitting.postSkills',
+            'uses' => 'FittingController@postSkills',
+            'middleware' => 'bouncer:fitting.view'
+        ]);
     });
 });
