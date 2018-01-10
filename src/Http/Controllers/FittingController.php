@@ -87,16 +87,26 @@ class FittingController extends Controller
 
     public function getFittingList()
     {
-       $fitnames = [];
+        $fitnames = [];
    
-       $fittings = \Denngarr\Seat\Fitting\Models\Fitting::all();
+        $fittings = \Denngarr\Seat\Fitting\Models\Fitting::all();
 
-       if (count($fittings) === 0) {
-           return ["No fits found."];
-       } 
-       else {
-           return $fittings;
-       }
+        if (count($fittings) === 0) {
+            return ["No fits found."];
+        } else {
+            foreach ($fittings as $fit) {
+                $ship = InvType::where('typeName', $fit->shiptype)->first();
+                array_push($fitnames, ['id' => $fit->id, 'shiptype' => $fit->shiptype, 'fitname' => $fit->fitname, 'typeID' => $ship->typeID]);
+            }
+        }
+        //dd($fitnames);
+        return $fitnames;
+    }
+
+    public function deleteFittingById($id)
+    {
+        \Denngarr\Seat\Fitting\Models\Fitting::destroy($id);
+        return;
     }
 
     public function getSkillsByFitId($id)
@@ -108,8 +118,9 @@ class FittingController extends Controller
         $skillsToons['skills'] = json_decode($this->calculate($fitting->eftfitting));
 
         $characters = $this->getUserCharacters(auth()->user()->id);
-        $index = 0;
+
         foreach ($characters as $character) {
+            $index = $character->characterID;
             $skillsToons['characters'][$index]['id'] = $character->characterID;
             $skillsToons['characters'][$index]['name'] = $character->characterName;
             $characterSkills = $this->getCharacterSkillsInformation($character->characterID);
@@ -125,9 +136,8 @@ class FittingController extends Controller
                         $skillsToons['characters'][$index]['skill'][$skill->typeId]['level'] = 0;
                         $skillsToons['characters'][$index]['skill'][$skill->typeId]['rank'] = $rank->valueFloat;
                     }
-                }  
+                }
             }
-            $index++;
         }
 
         return json_encode($skillsToons);
@@ -153,7 +163,8 @@ class FittingController extends Controller
         $fitting->eftfitting = $request->eftfitting;
         $fitting->save();
 
-        $this->getFittingView();
+        $fitlist = $this->getFittingList();
+        return view('fitting::fitting', compact('fitlist'));
     }
 
     public function postFitting(Fitting $request)
@@ -177,7 +188,6 @@ class FittingController extends Controller
         
         if (($jsfit['shipname'] === 'Tengu') || ($jsfit['shipname'] === 'Loki') ||
             ($jsfit['shipname'] === 'Legion') || ($jsfit['shipname'] === 'Proteus')) {
-
             $subslot = array_filter(preg_split("/\r?\n/", $data[4]));
             if (count($data) > 5) {
                 $drones = array_filter(preg_split("/\r?\n/", $data[5]));
@@ -246,8 +256,36 @@ class FittingController extends Controller
 
     public function postSkills(Fitting $request)
     {
-        $eft = $request->input('eftfitting');
-        return $this->calculate($eft);
+        $userId = auth()->user()->id;
+        
+        $skillsToons = [];
+        $fitting = $request->input('eftfitting');
+        $skillsToons['skills'] = json_decode($this->calculate($fitting));
+
+        $characters = $this->getUserCharacters(auth()->user()->id);
+
+        foreach ($characters as $character) {
+            $index = $character->characterID;
+            $skillsToons['characters'][$index]['id'] = $character->characterID;
+            $skillsToons['characters'][$index]['name'] = $character->characterName;
+            $characterSkills = $this->getCharacterSkillsInformation($character->characterID);
+            foreach ($characterSkills as $skill) {
+                $rank = DgmTypeAttributes::where('typeID', $skill->typeID)->where('attributeID', '275')->first();
+                $skillsToons['characters'][$index]['skill'][$skill->typeID]['level'] = $skill->level;
+                $skillsToons['characters'][$index]['skill'][$skill->typeID]['rank'] = $rank->valueFloat;
+
+                // Fill in missing skills so Javascript doesn't barf and you have the correct rank
+                foreach ($skillsToons['skills'] as $skill) {
+                    if (!isset($skillsToons['characters'][$index]['skill'][$skill->typeId])) {
+                        $rank = DgmTypeAttributes::where('typeID', $skill->typeId)->where('attributeID', '275')->first();
+                        $skillsToons['characters'][$index]['skill'][$skill->typeId]['level'] = 0;
+                        $skillsToons['characters'][$index]['skill'][$skill->typeId]['rank'] = $rank->valueFloat;
+                    }
+                }
+            }
+        }
+
+        return json_encode($skillsToons);
     }
 
     public function calculate($fitting)

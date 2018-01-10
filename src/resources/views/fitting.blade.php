@@ -26,13 +26,28 @@
                     </form>
                 </div>
                 <div class="tab-pane" id="tab_3">
-                    <table id='fitlist' class="table table-hover">
+                    <table id='fitlist' class="table table-hover" style="vertical-align: top">
                     <tr>
+                    <thead>
+                        <th></th>
+                        <th>Ship</th>
                         <th>Fit Name</th>
+                    </thead>
                     </tr>
+                    <tbody>
                     @foreach($fitlist as $fit)
-                        <tr id="fitid" data-id="{{ $fit->id }}"><td>[ {{ $fit->shiptype }}, {{$fit->fitname }} ]</td></tr><br />
+                        <tr id="fitid" data-id="{{ $fit['id'] }}">
+                           <td><img src='https://image.eveonline.com/Type/{{ $fit['typeID'] }}_32.png' height='24' /></td>
+                           <td>{{ $fit['shiptype'] }}</td>
+                           <td>{{ $fit['fitname'] }}</td>
+                           <td class="align-right">
+                               <button type="button" id="deletefit" class="btn btn-xs btn-danger" data-id="{{ $fit['id'] }}">
+                                   <span class="fa fa-trash text-white"></span>
+                               </button>
+                           </td>
+                        </tr>
                     @endforeach
+                    </tbody>
                     </table>
                 </div>
             </div>
@@ -40,8 +55,9 @@
     </div>
 @endsection
 @section('center')
-    <div class="box box-primary box-solid">
+    <div class="box box-primary box-solid" id="fitting-box">
         <div class="box-header"><h3 class="box-title" id='middle-header'></h3></div>
+        <input type="hidden" id="fittingId" value=""\>
         <div class="box-body">
             <div id="fitting-window">
                  <table class="table table-condensed table-striped" id="lowSlots">
@@ -98,11 +114,17 @@
     </div>
 @endsection
 @section('right')
-    <div class="box box-primary box-solid">
+    <div class="box box-primary box-solid" id="skills-box">
         <div class="box-header form-group"><h3 class="box-title" id="skill-title">Required Skills</h3></div>
         <div class="box-body">
             <div id="skills-window">
-            <p id="infoblox"></p>
+            <table class="table table-condensed">
+            <tr>
+            <td><span class="fa fa-square " style="color: #5ac597"></span> Required Level</td><td><span class="fa fa-square text-green"></span> Exceeded</td>
+            <td><span class="fa fa-square-o text-danger"></span> Missing Level</td> <td><span class="fa fa-square-o text-green"></span> Empty Level</td>
+            </tr>
+            </table>
+            <select id="characterSpinner" class="form-control"></select>
             <table style="width: 100%" class="table table-condensed table-striped">
                 <thead>
                     <tr>
@@ -120,15 +142,30 @@
 
 @push('javascript')
     <script type="application/javascript">
-        $('#fitting-window').hide();
-        $('#skills-window').hide();
+        $('#fitting-box').hide();
+        $('#skills-box').hide();
         $('#savefitting').hide()
 
+        
+        $('#fitlist').on('click', '#deletefit', function () {
+            alert( $(this).data('id'));
+            $.ajax({
+                headers: function () {
+                },
+                url: "/fitting/delfittingbyid/"+$(this).data('id'),
+                type: "GET",
+                dataType: 'json',
+                timeout: 10000,
+            }).done( function (result) {
+                location.reload();
+            });
+        });
+
         $('#fitlist').on('click', '#fitid', function () {
-          /* alert( $(this).data('id')); */
           $('#highSlots, #midSlots, #lowSlots, #rigs, #cargo, #drones, #subSlots')
                 .find('tbody')
                 .empty();
+          $('#fittingId').text($(this).data('id'));
 
           uri = "['id' => " + $(this).data('id') +"]";
           $.ajax({
@@ -142,6 +179,7 @@
               $('#highSlots, #midSlots, #lowSlots, #rigs, #cargo, #drones, #subSlots')
               .find('tbody')
               .empty();
+              $('#fitting-box').show();
               fillFittingWindow(result);
           });
 
@@ -154,37 +192,22 @@
               timeout: 10000,
           }).done( function (result) {
               if (result) {
-                  $('#skills-window').show();
+                  $('#skills-box').show();
                   $('#skillbody').empty();
-                  spinner = '<select id="characterSpinner" class="form-control">';
-
-                  for (var toons in result.characters) {
-                       spinner = spinner + '<option value="'+result.characters[toons].id+'">'+result.characters[toons].name+'</option>';
-                  }
-                  spinner = spinner + '</select>';
-                  $('#skills-window').prepend(spinner);
-
-                  for (var skills in result.skills) {
-                      skill = result.skills[skills];
-                      if (typeof result.characters[0].skill[skill.typeId] != "undefined") {
-                          charskillid = result.characters[0].skill[skill.typeId].level;
-                          charskillid = charskillid ? charskillid : 0;
-                          rank = result.characters[0].skill[skill.typeId].rank;
-                      } else {
-                          charskillid = 0;
-                          rank = 1;
+                  
+                  if ($('#characterSpinner option').size() == 0) {
+                      for (var toons in result.characters) {
+                           $('#characterSpinner').append('<option value="'+result.characters[toons].id+'">'+result.characters[toons].name+'</option>');
                       }
-
-                      graphbox = drawLevelBox2(skill.level, charskillid, skill.typeName, rank);
-                      $('#skillbody').append(graphbox);
                   }
+                  fillSkills(result);
               }
           });
        });
  
         $('#verifyfitting').on('click', function () {
-            $('.overlay').show();
             eftcode = {'eftfitting':$('#eftfitting').val(), '_token': '{{ csrf_token() }}'};
+            $('#skills-box').hide();
 
             $('#highSlots, #midSlots, #lowSlots, #rigs, #cargo, #drones, #subSlots')
                 .find('tbody')
@@ -198,66 +221,71 @@
                 data: eftcode,
                 timeout: 10000,
             }).done( function (result) {
+                $('#fitting-box').show();
                 fillFittingWindow(result);
             }).fail(function (result) {
             });
 
-            $.ajax({
-                headers: function () {
-                },
-                url: "{{ route('fitting.postSkills') }}",
-                type: "POST",
-                dataType: 'json',
-                data: eftcode,
-                timeout: 10000,
-            }).done( function (result) {
-                if (result) {
-                    $('#skills-window').show();
-                    $('#skillbody').empty();
-                    for (var skills in result) {
-                        skill = result[skills];
-                        graphbox = drawLevelBox2(skill.level, 0, skill.typeName);
-                        $('#skillbody').append(graphbox);
-                    }
-                }
-            }).fail(function (result) {
-            });
-
         });
+        
+        $('#characterSpinner').change( function () {
+          $.ajax({
+              headers: function () {
+              },
+              url: "/fitting/getskillsbyfitid/"+$('#fittingId').text(),
+              type: "GET",
+              dataType: 'json',
+              timeout: 10000,
+          }).done( function (result) {
+              if (result) {
+                  $('#skills-box').show();
+                  $('#skillbody').empty();
+
+                  fillSkills(result);
+              }
+          });
+       });
+
+        function fillSkills (result) {
+
+            characterId = $('#characterSpinner').find(":selected").val();
+            for (var skills in result.skills) {
+                skill = result.skills[skills];
+                if (typeof result.characters[characterId].skill[skill.typeId] != "undefined") {
+                    charskillid = result.characters[characterId].skill[skill.typeId].level;
+                    rank = result.characters[characterId].skill[skill.typeId].rank;
+                }
+                graphbox = drawLevelBox2(skill.level, charskillid, skill.typeName, rank);
+                $('#skillbody').append(graphbox);
+            }
+        } 
 
         function drawLevelBox2 (neededLevel, currentLevel, skillName, rank) {
             graph = '<tr><td>'+skillName+' (x'+rank+')</td>';
             graph = graph + '<td><div style="background-color: transparent; width: 5.5em; text-align: center; height: 1.35em; letter-spacing: 2.25px;">';
 
-            for (var i = 0; i < currentLevel; i++) {
-                graph = graph + '<span class="fa fa-square text-green" style="vertical-align: text-top"></span>';
-            }
-            for (var i = 0; i < (neededLevel - currentLevel); i++) {
-                graph = graph + '<span class="fa fa-square text-yellow" style="vertical-align: text-top"></span>';
-            }
-            fill = currentLevel > neededLevel ? currentLevel : neededLevel;
-            for (var i = 0; i < (5 - fill); i++) {
-                graph = graph + '<span class="fa fa-square-o text-green" style="vertical-align: text-top"></span>';
+            if (currentLevel >= neededLevel) {
+                for (var i = 0; i < neededLevel; i++) {
+                    graph = graph + '<span class="fa fa-square " style="vertical-align: text-top; color: #5ac597;"></span>';
+                }
+                for (var i = neededLevel; i < currentLevel; i++) {
+                    graph = graph + '<span class="fa fa-square text-green" style="vertical-align: text-top"></span>';
+                }
+                for (var i = 0; i < (5 - currentLevel); i++) {
+                    graph = graph + '<span class="fa fa-square-o text-green" style="vertical-align: text-top"></span>';
+                }
+            } else {
+                for (var i = 0; i < currentLevel; i++) {
+                    graph = graph + '<span class="fa fa-square " style="vertical-align: text-top; color: #5ac597;"></span>';
+                }
+                for (var i = 0; i < (neededLevel - currentLevel); i++) {
+                    graph = graph + '<span class="fa fa-square-o text-danger" style="vertical-align: text-top"></span>';
+                }
+                for (var i = 0; i < (5 - neededLevel) ; i++) {
+                    graph = graph + '<span class="fa fa-square-o text-green" style="vertical-align: text-top"></span>';
+                }
             }
             graph = graph + '</div></td></tr>';
-            return graph;
-        }
-
-        function drawLevelBox (neededLevel, currentLevel, skillName) {
-            graph = '<tr><td>'+skillName+'</td>';
-            graph = graph + '<td><table id="skilllevel" style="background-color: black; width: 64px; height: 14px; border: 2px solid black; border-collapse: collapse;"><tr>';
-
-            for (var i = 0; i < currentLevel; i++) {
-                graph = graph + '<td style="background-color: green; width: 10px; border: 2px solid black;"></td>';
-            }
-            for (var i = 0; i < (neededLevel - currentLevel); i++) {
-                graph = graph + '<td style="background-color: yellow; width: 10px; border: 2px solid black;"></td>';
-            }
-            fill = currentLevel > neededLevel ? currentLevel : neededLevel;
-            for (var i = 0; i < (5 - fill); i++) {
-                graph = graph + '<td style="background-color: gray; width: 10px; border: 2px solid black;"></td>';
-            }
-            graph = graph + '</tr></table></td></tr>';
             return graph;
         }
 

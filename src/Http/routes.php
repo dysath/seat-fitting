@@ -35,5 +35,9 @@ Route::group([
             'uses' => 'FittingController@getSkillsByFitId',
             'middleware' => 'bouncer:fitting.view'
         ]);
+        Route::get('/delfittingbyid/{id}', [
+            'uses' => 'FittingController@deleteFittingById',
+            'middleware' => 'bouncer:fitting.create'
+        ]);
     });
 });
