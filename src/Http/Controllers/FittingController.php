@@ -5,13 +5,19 @@ namespace Denngarr\Seat\Fitting\Http\Controllers;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use GuzzleHttp\Client;
+use Seat\Eveapi\Models\Character\CharacterSheet;
+use Seat\Services\Repositories\Character\Info;
+use Seat\Services\Repositories\Character\Skills;
+use Seat\Services\Repositories\Configuration\UserRespository;
 use Seat\Web\Http\Controllers\Controller;
 use Denngarr\Seat\Fitting\Validation\Fitting;
+use Denngarr\Seat\Fitting\Models\Fitting as FittingModel;
 use Denngarr\Seat\Fitting\Models\Sde\InvType;
 use Denngarr\Seat\Fitting\Models\Sde\DgmTypeAttributes;
 
 class FittingController extends Controller
 {
+    use UserRespository, Info, Skills;
 
     // don't touch this, or you will lose your hands
     // see dgmAttributeTypes to know what they are
@@ -79,26 +85,107 @@ class FittingController extends Controller
 
     private $requiredSkills = [];
 
+    public function getFittingList()
+    {
+       $fitnames = [];
+   
+       $fittings = \Denngarr\Seat\Fitting\Models\Fitting::all();
+
+       if (count($fittings) === 0) {
+           return ["No fits found."];
+       } 
+       else {
+           return $fittings;
+       }
+    }
+
+    public function getSkillsByFitId($id)
+    {
+        $userId = auth()->user()->id;
+        
+        $skillsToons = [];
+        $fitting = \Denngarr\Seat\Fitting\Models\Fitting::find($id);
+        $skillsToons['skills'] = json_decode($this->calculate($fitting->eftfitting));
+
+        $characters = $this->getUserCharacters(auth()->user()->id);
+        $index = 0;
+        foreach ($characters as $character) {
+            $skillsToons['characters'][$index]['id'] = $character->characterID;
+            $skillsToons['characters'][$index]['name'] = $character->characterName;
+            $characterSkills = $this->getCharacterSkillsInformation($character->characterID);
+            foreach ($characterSkills as $skill) {
+                $rank = DgmTypeAttributes::where('typeID', $skill->typeID)->where('attributeID', '275')->first();
+                $skillsToons['characters'][$index]['skill'][$skill->typeID]['level'] = $skill->level;
+                $skillsToons['characters'][$index]['skill'][$skill->typeID]['rank'] = $rank->valueFloat;
+
+                // Fill in missing skills so Javascript doesn't barf and you have the correct rank
+                foreach ($skillsToons['skills'] as $skill) {
+                    if (!isset($skillsToons['characters'][$index]['skill'][$skill->typeId])) {
+                        $rank = DgmTypeAttributes::where('typeID', $skill->typeId)->where('attributeID', '275')->first();
+                        $skillsToons['characters'][$index]['skill'][$skill->typeId]['level'] = 0;
+                        $skillsToons['characters'][$index]['skill'][$skill->typeId]['rank'] = $rank->valueFloat;
+                    }
+                }  
+            }
+            $index++;
+        }
+
+        return json_encode($skillsToons);
+    }
+
+    public function getFittingById($id)
+    {
+        $fitting = \Denngarr\Seat\Fitting\Models\Fitting::find($id);
+        return $this->fittingParser($fitting->eftfitting);
+    }
+
     public function getFittingView()
     {
-        return view('fitting::fitting');
+        $fitlist = $this->getFittingList();
+        return view('fitting::fitting', compact('fitlist'));
+    }
+
+    public function saveFitting(Fitting $request)
+    {
+        $fitting = new \Denngarr\Seat\Fitting\Models\Fitting;
+        $eft = explode("\n", $request->eftfitting);
+        list($fitting->shiptype, $fitting->fitname) = explode(", ", substr($eft[0], 1, -2));
+        $fitting->eftfitting = $request->eftfitting;
+        $fitting->save();
+
+        $this->getFittingView();
     }
 
     public function postFitting(Fitting $request)
     {
-        $jsfit = [];
         $eft = $request->input('eftfitting');
+        return $this->fittingParser($eft);
+    }
 
-        $data = explode("\n\n", $eft);
 
-        $lowslot = array_filter(explode("\n", $data[0]));
-        $midslot = array_filter(explode("\n", $data[1]));
-        $highslot = array_filter(explode("\n", $data[2]));
-        $rigs = array_filter(explode("\n", $data[3]));
-        $drones = array_filter(explode("\n", $data[4]));
+    public function fittingParser($eft)
+    {
+        $jsfit = [];
+        $data = preg_split("/\r?\n\r?\n/", $eft);
 
-        // get shipname of first line by removing brackets
+        $lowslot = array_filter(preg_split("/\r?\n/", $data[0]));
         list($jsfit['shipname'], $jsfit['fitname']) = explode(", ", substr(array_shift($lowslot), 1, -1));
+
+        $midslot = array_filter(preg_split("/\r?\n/", $data[1]));
+        $highslot = array_filter(preg_split("/\r?\n/", $data[2]));
+        $rigs = array_filter(preg_split("/\r?\n/", $data[3]));
+        
+        if (($jsfit['shipname'] === 'Tengu') || ($jsfit['shipname'] === 'Loki') ||
+            ($jsfit['shipname'] === 'Legion') || ($jsfit['shipname'] === 'Proteus')) {
+
+            $subslot = array_filter(preg_split("/\r?\n/", $data[4]));
+            if (count($data) > 5) {
+                $drones = array_filter(preg_split("/\r?\n/", $data[5]));
+            }
+        } else {
+            $drones = array_filter(preg_split("/\r?\n/", $data[4]));
+        }
+        // get shipname of first line by removing brackets
         
         $index=0;
         foreach ($lowslot as $slot) {
@@ -117,7 +204,7 @@ class FittingController extends Controller
             $jsfit['MedSlot'.$index]['name'] = $module[0];
             $index++;
         }
-        
+
         $index=0;
         foreach ($highslot as $slot) {
             $module = explode(",", $slot);
@@ -125,6 +212,17 @@ class FittingController extends Controller
             $jsfit['HiSlot'.$index]['id'] = $item->typeID;
             $jsfit['HiSlot'.$index]['name'] = $module[0];
             $index++;
+        }
+       
+        if (isset($subslot)) {
+            $index=0;
+            foreach ($subslot as $slot) {
+                $module = explode(",", $slot);
+                $item = InvType::where('typeName', $module[0])->first();
+                $jsfit['SubSlot'.$index]['id'] = $item->typeID;
+                $jsfit['SubSlot'.$index]['name'] = $module[0];
+                $index++;
+            }
         }
         
         $index=0;
@@ -135,13 +233,14 @@ class FittingController extends Controller
             $index++;
         }
         
-        foreach ($drones as $slot) {
-            list($drone, $qty) = explode(" x", $slot);
-            $item = InvType::where('typeName', $drone)->first();
-            $jsfit['dronebay'][$item->typeID]['name'] = $drone;
-            $jsfit['dronebay'][$item->typeID]['qty'] = $qty;
+        if (isset($drones)) {
+            foreach ($drones as $slot) {
+                list($drone, $qty) = explode(" x", $slot);
+                $item = InvType::where('typeName', $drone)->first();
+                $jsfit['dronebay'][$item->typeID]['name'] = $drone;
+                $jsfit['dronebay'][$item->typeID]['qty'] = $qty;
+            }
         }
-
         return(json_encode($jsfit));
     }
 

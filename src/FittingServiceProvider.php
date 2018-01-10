@@ -65,9 +65,9 @@ class FittingServiceProvider extends ServiceProvider
 
     public function add_publications()
     {
-//        $this->publishes([
-//            __DIR__ . '/database/migrations/' => database_path('migrations')
-//        ]);
+        $this->publishes([
+            __DIR__ . '/database/migrations/' => database_path('migrations')
+        ]);
     }
 
     private function addCommands()

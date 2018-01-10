@@ -22,5 +22,18 @@ Route::group([
             'uses' => 'FittingController@postSkills',
             'middleware' => 'bouncer:fitting.view'
         ]);
+        Route::post('/savefitting', [
+            'as'   => 'fitting.saveFitting',
+            'uses' => 'FittingController@saveFitting',
+            'middleware' => 'bouncer:fitting.create'
+        ]);
+        Route::get('/getfittingbyid/{id}', [
+            'uses' => 'FittingController@getFittingById',
+            'middleware' => 'bouncer:fitting.view'
+        ]);
+        Route::get('/getskillsbyfitid/{id}', [
+            'uses' => 'FittingController@getSkillsByFitId',
+            'middleware' => 'bouncer:fitting.view'
+        ]);
     });
 });
