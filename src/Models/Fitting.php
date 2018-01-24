@@ -13,11 +13,7 @@ class Fitting extends Model
 {
     public $timestamps = true;
 
-    public $incrementing = true;
-
     protected $table = 'seat-fitting';
 
-    protected $primaryKey = 'id';
-
-    protected $fillable = ['shiptype', 'fitgname', 'eftfitting'];
+    protected $fillable = ['id', 'shiptype', 'fitname', 'eftfitting'];
 }

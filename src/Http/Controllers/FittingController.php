@@ -87,26 +87,27 @@ class FittingController extends Controller
 
     public function getFittingList()
     {
-        $fitnames = [];
+       $fitnames = [];
    
-        $fittings = \Denngarr\Seat\Fitting\Models\Fitting::all();
+       $fittings = \Denngarr\Seat\Fitting\Models\Fitting::all();
 
-        if (count($fittings) === 0) {
-            return ["No fits found."];
-        } else {
-            foreach ($fittings as $fit) {
-                $ship = InvType::where('typeName', $fit->shiptype)->first();
-                array_push($fitnames, ['id' => $fit->id, 'shiptype' => $fit->shiptype, 'fitname' => $fit->fitname, 'typeID' => $ship->typeID]);
-            }
-        }
-        //dd($fitnames);
-        return $fitnames;
+       if (count($fittings) === 0) {
+           return ["No fits found."];
+       } 
+       else {
+         foreach ($fittings as $fit) {
+           $ship = InvType::where('typeName', $fit->shiptype)->first();
+           array_push($fitnames, ['id' => $fit->id, 'shiptype' => $fit->shiptype, 'fitname' => $fit->fitname, 'typeID' => $ship->typeID]);
+         }
+       }
+//dd($fitnames);
+       return $fitnames;
     }
 
     public function deleteFittingById($id)
     {
         \Denngarr\Seat\Fitting\Models\Fitting::destroy($id);
-        return;
+        return "Success";
     }
 
     public function getSkillsByFitId($id)
@@ -136,11 +137,17 @@ class FittingController extends Controller
                         $skillsToons['characters'][$index]['skill'][$skill->typeId]['level'] = 0;
                         $skillsToons['characters'][$index]['skill'][$skill->typeId]['rank'] = $rank->valueFloat;
                     }
-                }
+                }  
             }
         }
 
         return json_encode($skillsToons);
+    }
+
+    public function getEftFittingById($id)
+    {
+        $fitting = \Denngarr\Seat\Fitting\Models\Fitting::find($id);
+        return $fitting->eftfitting;
     }
 
     public function getFittingById($id)
@@ -157,7 +164,11 @@ class FittingController extends Controller
 
     public function saveFitting(Fitting $request)
     {
-        $fitting = new \Denngarr\Seat\Fitting\Models\Fitting;
+        if ($request->fitSelection > 1) {
+            $fitting = FittingModel::find($request->fitSelection);
+        } else {
+            $fitting = new \Denngarr\Seat\Fitting\Models\Fitting;
+        }
         $eft = explode("\n", $request->eftfitting);
         list($fitting->shiptype, $fitting->fitname) = explode(", ", substr($eft[0], 1, -2));
         $fitting->eftfitting = $request->eftfitting;
@@ -180,7 +191,7 @@ class FittingController extends Controller
         $data = preg_split("/\r?\n\r?\n/", $eft);
 
         $lowslot = array_filter(preg_split("/\r?\n/", $data[0]));
-        list($jsfit['shipname'], $jsfit['fitname']) = explode(", ", substr(array_shift($lowslot), 1, -1));
+        list($jsfit['shipname'], $jsfit['fitname']) = explode(",", substr(array_shift($lowslot), 1, -1));
 
         $midslot = array_filter(preg_split("/\r?\n/", $data[1]));
         $highslot = array_filter(preg_split("/\r?\n/", $data[2]));
@@ -188,11 +199,12 @@ class FittingController extends Controller
         
         if (($jsfit['shipname'] === 'Tengu') || ($jsfit['shipname'] === 'Loki') ||
             ($jsfit['shipname'] === 'Legion') || ($jsfit['shipname'] === 'Proteus')) {
+
             $subslot = array_filter(preg_split("/\r?\n/", $data[4]));
             if (count($data) > 5) {
                 $drones = array_filter(preg_split("/\r?\n/", $data[5]));
             }
-        } else {
+        } elseif (count($data) > 4) {
             $drones = array_filter(preg_split("/\r?\n/", $data[4]));
         }
         // get shipname of first line by removing brackets
@@ -281,11 +293,14 @@ class FittingController extends Controller
                         $skillsToons['characters'][$index]['skill'][$skill->typeId]['level'] = 0;
                         $skillsToons['characters'][$index]['skill'][$skill->typeId]['rank'] = $rank->valueFloat;
                     }
-                }
+                }  
             }
         }
 
         return json_encode($skillsToons);
+
+
+
     }
 
     public function calculate($fitting)

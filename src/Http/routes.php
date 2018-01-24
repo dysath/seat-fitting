@@ -31,6 +31,10 @@ Route::group([
             'uses' => 'FittingController@getFittingById',
             'middleware' => 'bouncer:fitting.view'
         ]);
+        Route::get('/geteftfittingbyid/{id}', [
+            'uses' => 'FittingController@getEftFittingById',
+            'middleware' => 'bouncer:fitting.view'
+        ]);
         Route::get('/getskillsbyfitid/{id}', [
             'uses' => 'FittingController@getSkillsByFitId',
             'middleware' => 'bouncer:fitting.view'

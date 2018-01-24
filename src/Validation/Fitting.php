@@ -14,6 +14,7 @@ class Fitting extends FormRequest
     public function rules()
     {
         return [
+            'fitSelection' => 'nullable',
             'eftfitting' => 'required'
         ];
     }

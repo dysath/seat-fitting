@@ -5,52 +5,91 @@
 
 @section('left')
     <div class="box box-primary box-solid">
-        <div class="box-header"><h3 class="box-title">Fitting Requests</h3></div>
+        <div class="box-header">
+           <h3 class="box-title">Fittings</h3>
+           <span class="pull-right">
+               <button type="button" class="btn btn-xs btn-primary" id="addFitting">
+                   <span class="fa fa-plus-square"></span>
+               </button>
+           </span>
+        </div>
         <div class="box-body">
-            <div class="nav-tabs-custom">
-                <ul class="nav nav-tabs">
-                    <li class="active"><a href="#tab_1" data-toggle="tab">Add a Fitting</a></li>
-	            <li><a href="#tab_3" data-toggle="tab">Fittings List</a></li>
-                </ul>
-            </div>
-            <div class="tab-content">
-                <div class="tab-pane active" id="tab_1">
-                    <p>Cut and Paste EFT fitting in the box below</p>
-                    <form role="form" action="{{ route('fitting.saveFitting') }}" method="post">
-                         {{ csrf_field() }}
-                         <textarea name="eftfitting" id="eftfitting" rows="15" style="width: 100%"></textarea>
-                             <div class="btn-group pull-right" role="group">
-                                 <input type="button" class="btn btn-default" id="verifyfitting" value="Verify this Fitting" />
-                                 <input type="submit" class="btn btn-primary" id="savefitting" value="Submit this Fitting"/>
-                             </div>
-                    </form>
-                </div>
-                <div class="tab-pane" id="tab_3">
-                    <table id='fitlist' class="table table-hover" style="vertical-align: top">
-                    <tr>
-                    <thead>
-                        <th></th>
-                        <th>Ship</th>
-                        <th>Fit Name</th>
-                    </thead>
-                    </tr>
-                    <tbody>
-                    @foreach($fitlist as $fit)
-                        <tr id="fitid" data-id="{{ $fit['id'] }}">
-                           <td><img src='https://image.eveonline.com/Type/{{ $fit['typeID'] }}_32.png' height='24' /></td>
-                           <td>{{ $fit['shiptype'] }}</td>
-                           <td>{{ $fit['fitname'] }}</td>
-                           <td class="align-right">
-                               <button type="button" id="deletefit" class="btn btn-xs btn-danger" data-id="{{ $fit['id'] }}">
-                                   <span class="fa fa-trash text-white"></span>
-                               </button>
-                           </td>
-                        </tr>
-                    @endforeach
-                    </tbody>
-                    </table>
-                </div>
-            </div>
+        <table id='fitlist' class="table table-hover" style="vertical-align: top">
+            <tr>
+            <thead>
+                <th></th>
+                <th>Ship</th>
+                <th>Fit Name</th>
+                <th></th>
+             </thead>
+             </tr>
+             <tbody>
+             @foreach($fitlist as $fit)
+             <tr id="fitid" data-id="{{ $fit['id'] }}">
+                 <td><img src='https://image.eveonline.com/Type/{{ $fit['typeID'] }}_32.png' height='24' /></td>
+                 <td>{{ $fit['shiptype'] }}</td>
+                 <td>{{ $fit['fitname'] }}</td>
+                 <td class="no-hover pull-right">
+                     <button type="button" id="viewfit" class="btn btn-xs btn-success" data-id="{{ $fit['id'] }}">
+                         <span class="fa fa-eye text-white"></span>
+                     </button>
+                     <button type="button" id="editfit" class="btn btn-xs btn-warning" data-id="{{ $fit['id'] }}">
+                         <span class="fa fa-pencil text-white"></span>
+                     </button>
+                     <button type="button" id="deletefit" class="btn btn-xs btn-danger" data-id="{{ $fit['id'] }}">
+                         <span class="fa fa-trash text-white"></span>
+                     </button>
+                 </td>
+             </tr>
+             @endforeach
+             </tbody>
+        </table>
+
+
+<div class="modal fade" tabindex="-1" role="dialog" id="fitEditModal">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-primary">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Are you sure?</h4>
+      </div>
+      <form role="form" action="{{ route('fitting.saveFitting') }}" method="post">
+          <input type="hidden" id="fitSelection" name="fitSelection" value="0">
+          <div class="modal-body">
+              <p>Cut and Paste EFT fitting in the box below</p>
+              {{ csrf_field() }}
+              <textarea name="eftfitting" id="eftfitting" rows="15" style="width: 100%"></textarea>
+          </div>
+          <div class="modal-footer">
+              <div class="btn-group pull-right" role="group">
+                  <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                  <input type="submit" class="btn btn-primary" id="savefitting" value="Submit Fitting" />
+              </div>
+          </div>
+      </form>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<div class="modal fade" tabindex="-1" role="dialog" id="fitConfirmModal">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-primary">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Are you sure?</h4>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete this fitting?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="deleteConfirm" data-dismiss="modal">Delete Fitting</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
         </div>
     </div>
 @endsection
@@ -141,190 +180,193 @@
 @endsection
 
 @push('javascript')
-    <script type="application/javascript">
-        $('#fitting-box').hide();
-        $('#skills-box').hide();
-        $('#savefitting').hide()
+<script type="application/javascript">
+$('#fitting-box').hide();
+$('#skills-box').hide();
 
-        
-        $('#fitlist').on('click', '#deletefit', function () {
-            alert( $(this).data('id'));
-            $.ajax({
-                headers: function () {
-                },
-                url: "/fitting/delfittingbyid/"+$(this).data('id'),
-                type: "GET",
-                dataType: 'json',
-                timeout: 10000,
-            }).done( function (result) {
-                location.reload();
-            });
-        });
+$('#addFitting').on('click', function () {
+    $('#fitEditModal').modal('show');
+    $('#fitSelection').val('0');
+    $('textarea#eftfitting').val('');
+});
 
-        $('#fitlist').on('click', '#fitid', function () {
-          $('#highSlots, #midSlots, #lowSlots, #rigs, #cargo, #drones, #subSlots')
-                .find('tbody')
-                .empty();
-          $('#fittingId').text($(this).data('id'));
+$('#fitlist').on('click', '#deletefit', function () {
+    $('#fitConfirmModal').modal('show');
+    $('#fitSelection').val($(this).data('id'));
+});
 
-          uri = "['id' => " + $(this).data('id') +"]";
-          $.ajax({
-              headers: function () {
-              },
-              url: "/fitting/getfittingbyid/"+$(this).data('id'),
-              type: "GET",
-              dataType: 'json',
-              timeout: 10000,
-          }).done( function (result) {
-              $('#highSlots, #midSlots, #lowSlots, #rigs, #cargo, #drones, #subSlots')
-              .find('tbody')
-              .empty();
-              $('#fitting-box').show();
-              fillFittingWindow(result);
-          });
+$('#fitlist').on('click', '#editfit', function () {
+    $('#fitEditModal').modal('show');
+    id = $(this).data('id');
+    $('#fitSelection').val(id);
+    $.ajax({
+	headers: function () {
+	},
+	url: "/fitting/geteftfittingbyid/"+id,
+	type: "GET",
+        datatype: 'string',
+	timeout: 10000
+    }).done( function (result) {
+      $('textarea#eftfitting').val(result);
+    }).fail( function(xmlHttpRequest, textStatus, errorThrown) {
+    });
+});
 
-          $.ajax({
-              headers: function () {
-              },
-              url: "/fitting/getskillsbyfitid/"+$(this).data('id'),
-              type: "GET",
-              dataType: 'json',
-              timeout: 10000,
-          }).done( function (result) {
-              if (result) {
-                  $('#skills-box').show();
-                  $('#skillbody').empty();
-                  
-                  if ($('#characterSpinner option').size() == 0) {
-                      for (var toons in result.characters) {
-                           $('#characterSpinner').append('<option value="'+result.characters[toons].id+'">'+result.characters[toons].name+'</option>');
-                      }
-                  }
-                  fillSkills(result);
-              }
-          });
-       });
- 
-        $('#verifyfitting').on('click', function () {
-            eftcode = {'eftfitting':$('#eftfitting').val(), '_token': '{{ csrf_token() }}'};
-            $('#skills-box').hide();
+$('#deleteConfirm').on('click', function () {    
+   id = $('#fitSelection').val();
+    $('#fitlist #fitid[data-id="'+id+'"]').remove();
+    $.ajax({
+	headers: function () {
+	},
+	url: "/fitting/delfittingbyid/"+id,
+	type: "GET",
+        datatype: 'json',
+	timeout: 10000
+    }).done( function (result) {
+        $('#fitlist #fitid[data-id="'+id+'"]').remove();
+    }).fail( function(xmlHttpRequest, textStatus, errorThrown) {
+    });
+});
 
-            $('#highSlots, #midSlots, #lowSlots, #rigs, #cargo, #drones, #subSlots')
-                .find('tbody')
-                .empty();
-            $.ajax({
-                headers: function () {
-                },
-                url: "{{ route('fitting.postFitting') }}",
-                type: "POST",
-                dataType: 'json',
-                data: eftcode,
-                timeout: 10000,
-            }).done( function (result) {
-                $('#fitting-box').show();
-                fillFittingWindow(result);
-            }).fail(function (result) {
-            });
+$('#fitlist').on('click', '#viewfit', function () {
+    $('#highSlots, #midSlots, #lowSlots, #rigs, #cargo, #drones, #subSlots')
+	.find('tbody')
+	.empty();
+    $('#fittingId').text($(this).data('id'));
 
-        });
-        
-        $('#characterSpinner').change( function () {
-          $.ajax({
-              headers: function () {
-              },
-              url: "/fitting/getskillsbyfitid/"+$('#fittingId').text(),
-              type: "GET",
-              dataType: 'json',
-              timeout: 10000,
-          }).done( function (result) {
-              if (result) {
-                  $('#skills-box').show();
-                  $('#skillbody').empty();
+    uri = "['id' => " + $(this).data('id') +"]";
+    $.ajax({
+        headers: function () {
+        },
+        url: "/fitting/getfittingbyid/"+$(this).data('id'),
+        type: "GET",
+        dataType: 'json',
+        timeout: 10000
+    }).done( function (result) {
+        $('#highSlots, #midSlots, #lowSlots, #rigs, #cargo, #drones, #subSlots')
+          .find('tbody')
+          .empty();
+        $('#fitting-box').show();
+        fillFittingWindow(result);
+    });
 
-                  fillSkills(result);
-              }
-          });
-       });
-
-        function fillSkills (result) {
-
-            characterId = $('#characterSpinner').find(":selected").val();
-            for (var skills in result.skills) {
-                skill = result.skills[skills];
-                if (typeof result.characters[characterId].skill[skill.typeId] != "undefined") {
-                    charskillid = result.characters[characterId].skill[skill.typeId].level;
-                    rank = result.characters[characterId].skill[skill.typeId].rank;
-                }
-                graphbox = drawLevelBox2(skill.level, charskillid, skill.typeName, rank);
-                $('#skillbody').append(graphbox);
-            }
-        } 
-
-        function drawLevelBox2 (neededLevel, currentLevel, skillName, rank) {
-            graph = '<tr><td>'+skillName+' (x'+rank+')</td>';
-            graph = graph + '<td><div style="background-color: transparent; width: 5.5em; text-align: center; height: 1.35em; letter-spacing: 2.25px;">';
-
-            if (currentLevel >= neededLevel) {
-                for (var i = 0; i < neededLevel; i++) {
-                    graph = graph + '<span class="fa fa-square " style="vertical-align: text-top; color: #5ac597;"></span>';
-                }
-                for (var i = neededLevel; i < currentLevel; i++) {
-                    graph = graph + '<span class="fa fa-square text-green" style="vertical-align: text-top"></span>';
-                }
-                for (var i = 0; i < (5 - currentLevel); i++) {
-                    graph = graph + '<span class="fa fa-square-o text-green" style="vertical-align: text-top"></span>';
-                }
-            } else {
-                for (var i = 0; i < currentLevel; i++) {
-                    graph = graph + '<span class="fa fa-square " style="vertical-align: text-top; color: #5ac597;"></span>';
-                }
-                for (var i = 0; i < (neededLevel - currentLevel); i++) {
-                    graph = graph + '<span class="fa fa-square-o text-danger" style="vertical-align: text-top"></span>';
-                }
-                for (var i = 0; i < (5 - neededLevel) ; i++) {
-                    graph = graph + '<span class="fa fa-square-o text-green" style="vertical-align: text-top"></span>';
+    $.ajax({
+        headers: function () {
+        },
+        url: "/fitting/getskillsbyfitid/"+$(this).data('id'),
+        type: "GET",
+        dataType: 'json',
+        timeout: 10000
+    }).done( function (result) {
+        if (result) {
+            $('#skills-box').show();
+            $('#skillbody').empty();
+	  
+            if ($('#characterSpinner option').size() === 0) {
+                for (var toons in result.characters) {
+                     $('#characterSpinner').append('<option value="'+result.characters[toons].id+'">'+result.characters[toons].name+'</option>');
                 }
             }
-            graph = graph + '</div></td></tr>';
-            return graph;
+            fillSkills(result);
         }
+    });
+});
 
-        function fillFittingWindow (result) {
-            if (result) {
-                $('#fitting-window').show();
-                $('#savefitting').show()
-                $('#middle-header').text(result['shipname'] + ', ' + result['fitname']);
-                for (var slot in result) {
-
-                    if (slot.indexOf('HiSlot') >= 0)
-                        $('#highSlots').find('tbody').append(
-                            "<tr><td><img src='https://image.eveonline.com/Type/" + result[slot].id + "_32.png' height='24' /> " + result[slot].name + "</td></tr>");
-
-                    if (slot.indexOf('MedSlot') >= 0)
-                        $('#midSlots').find('tbody').append(
-                            "<tr><td><img src='https://image.eveonline.com/Type/" + result[slot].id + "_32.png' height='24' /> " + result[slot].name + "</td></tr>");
-
-                    if (slot.indexOf('LoSlot') >= 0)
-                        $('#lowSlots').find('tbody').append(
-                            "<tr><td><img src='https://image.eveonline.com/Type/" + result[slot].id + "_32.png' height='24' /> " + result[slot].name + "</td></tr>");
-
-                    if (slot.indexOf('RigSlot') >= 0)
-                        $('#rigs').find('tbody').append(
-                            "<tr><td><img src='https://image.eveonline.com/Type/" + result[slot].id + "_32.png' height='24' /> " + result[slot].name + "</td></tr>");
-
-                    if (slot.indexOf('SubSlot') >= 0)
-                        $('#subSlots').find('tbody').append(
-                            "<tr><td><img src='https://image.eveonline.com/Type/" + result[slot].id + "_32.png' height='24' /> " + result[slot].name + "</td></tr>");
-
-                    if (slot.indexOf('dronebay') >= 0) {
-                        for (item in result[slot])
-                            $('#drones').find('tbody').append(
-                                "<tr><td><img src='https://image.eveonline.com/Type/" + item + "_32.png' height='24' /> " + result[slot][item].name + "</td><td>" + result[slot][item].qty + "</td></tr>");
-                    }
-                }
-            }
+$('#characterSpinner').change( function () {
+    $.ajax({
+        headers: function () {
+        },
+        url: "/fitting/getskillsbyfitid/"+$('#fittingId').text(),
+        type: "GET",
+        dataType: 'json',
+        timeout: 10000
+    }).done( function (result) {
+        if (result) {
+            $('#skills-box').show();
+            $('#skillbody').empty();
+            fillSkills(result);
         }
+    });
+});
 
-    </script>
+function fillSkills (result) {
+
+    characterId = $('#characterSpinner').find(":selected").val();
+    for (var skills in result.skills) {
+	skill = result.skills[skills];
+	if (typeof result.characters[characterId].skill[skill.typeId] != "undefined") {
+	    charskillid = result.characters[characterId].skill[skill.typeId].level;
+	    rank = result.characters[characterId].skill[skill.typeId].rank;
+	}
+	graphbox = drawLevelBox(skill.level, charskillid, skill.typeName, rank);
+	$('#skillbody').append(graphbox);
+    }
+} 
+
+function drawLevelBox (neededLevel, currentLevel, skillName, rank) {
+    graph = '<tr><td>'+skillName+' (x'+rank+')</td>';
+    graph = graph + '<td><div style="background-color: transparent; width: 5.5em; text-align: center; height: 1.35em; letter-spacing: 2.25px;">';
+
+    if (currentLevel >= neededLevel) {
+	for (var i = 0; i < neededLevel; i++) {
+	    graph = graph + '<span class="fa fa-square " style="vertical-align: text-top; color: #5ac597;"></span>';
+	}
+	for (var i = neededLevel; i < currentLevel; i++) {
+	    graph = graph + '<span class="fa fa-square text-green" style="vertical-align: text-top"></span>';
+	}
+	for (var i = 0; i < (5 - currentLevel); i++) {
+	    graph = graph + '<span class="fa fa-square-o text-green" style="vertical-align: text-top"></span>';
+	}
+    } else {
+	for (var i = 0; i < currentLevel; i++) {
+	    graph = graph + '<span class="fa fa-square " style="vertical-align: text-top; color: #5ac597;"></span>';
+	}
+	for (var i = 0; i < (neededLevel - currentLevel); i++) {
+	    graph = graph + '<span class="fa fa-square-o text-danger" style="vertical-align: text-top"></span>';
+	}
+	for (var i = 0; i < (5 - neededLevel) ; i++) {
+	    graph = graph + '<span class="fa fa-square-o text-green" style="vertical-align: text-top"></span>';
+	}
+    }
+    graph = graph + '</div></td></tr>';
+    return graph;
+}
+
+function fillFittingWindow (result) {
+    if (result) {
+	$('#fitting-window').show();
+	$('#middle-header').text(result.shipname + ', ' + result.fitname);
+	for (var slot in result) {
+
+	    if (slot.indexOf('HiSlot') >= 0)
+		$('#highSlots').find('tbody').append(
+		    "<tr><td><img src='https://image.eveonline.com/Type/" + result[slot].id + "_32.png' height='24' /> " + result[slot].name + "</td></tr>");
+
+	    if (slot.indexOf('MedSlot') >= 0)
+		$('#midSlots').find('tbody').append(
+		    "<tr><td><img src='https://image.eveonline.com/Type/" + result[slot].id + "_32.png' height='24' /> " + result[slot].name + "</td></tr>");
+
+	    if (slot.indexOf('LoSlot') >= 0)
+		$('#lowSlots').find('tbody').append(
+		    "<tr><td><img src='https://image.eveonline.com/Type/" + result[slot].id + "_32.png' height='24' /> " + result[slot].name + "</td></tr>");
+
+	    if (slot.indexOf('RigSlot') >= 0)
+		$('#rigs').find('tbody').append(
+		    "<tr><td><img src='https://image.eveonline.com/Type/" + result[slot].id + "_32.png' height='24' /> " + result[slot].name + "</td></tr>");
+
+	    if (slot.indexOf('SubSlot') >= 0)
+		$('#subSlots').find('tbody').append(
+		    "<tr><td><img src='https://image.eveonline.com/Type/" + result[slot].id + "_32.png' height='24' /> " + result[slot].name + "</td></tr>");
+
+	    if (slot.indexOf('dronebay') >= 0) {
+		for (var item in result[slot])
+		    $('#drones').find('tbody').append(
+			"<tr><td><img src='https://image.eveonline.com/Type/" + item + "_32.png' height='24' /> " + result[slot][item].name + "</td><td>" + result[slot][item].qty + "</td></tr>");
+	    }
+	}
+    }
+}
+
+</script>
 @endpush
 

@@ -33,7 +33,7 @@ class FittingServiceProvider extends ServiceProvider
 
     public function add_translations()
     {
-//        $this->loadTranslationsFrom(__DIR__ . '/lang', 'fitting');
+        $this->loadTranslationsFrom(__DIR__ . '/lang', 'fitting');
     }
 
     /**
