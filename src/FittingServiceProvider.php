@@ -60,7 +60,9 @@ class FittingServiceProvider extends ServiceProvider
         );
 
         $this->mergeConfigFrom(
-            __DIR__ . '/Config/fitting.permissions.php', 'web.permissions');
+            __DIR__ . '/Config/fitting.permissions.php',
+            'web.permissions'
+        );
     }
 
     public function add_publications()

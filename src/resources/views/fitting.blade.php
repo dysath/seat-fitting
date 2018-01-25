@@ -7,11 +7,13 @@
     <div class="box box-primary box-solid">
         <div class="box-header">
            <h3 class="box-title">Fittings</h3>
+           @if (auth()->user()->has('fitting.create')) 
            <span class="pull-right">
                <button type="button" class="btn btn-xs btn-primary" id="addFitting" data-toggle="tooltip" data-placement="top" title="Add a new fitting">
                    <span class="fa fa-plus-square"></span>
                </button>
            </span>
+           @endif
         </div>
         <div class="box-body">
         <table id='fitlist' class="table table-hover" style="vertical-align: top">
@@ -33,12 +35,14 @@
                      <button type="button" id="viewfit" class="btn btn-xs btn-success" data-id="{{ $fit['id'] }}" data-toggle="tooltip" data-placement="top" title="View Fitting">
                          <span class="fa fa-eye text-white"></span>
                      </button>
+                     @if (auth()->user()->has('fitting.create')) 
                      <button type="button" id="editfit" class="btn btn-xs btn-warning" data-id="{{ $fit['id'] }}" data-toggle="tooltip" data-placement="top" title="Edit Fitting">
                          <span class="fa fa-pencil text-white"></span>
                      </button>
                      <button type="button" id="deletefit" class="btn btn-xs btn-danger" data-id="{{ $fit['id'] }}" data-toggle="tooltip" data-placement="top" title="Delete Fitting">
                          <span class="fa fa-trash text-white"></span>
                      </button>
+                     @endif
                  </td>
              </tr>
              @endforeach
@@ -295,17 +299,37 @@ function fillSkills (result) {
     for (var skills in result.skills) {
 	skill = result.skills[skills];
 	if (typeof result.characters[characterId].skill[skill.typeId] != "undefined") {
-	    charskillid = result.characters[characterId].skill[skill.typeId].level;
+	    charskilllvl = result.characters[characterId].skill[skill.typeId].level;
 	    rank = result.characters[characterId].skill[skill.typeId].rank;
 	}
-	graphbox = drawLevelBox(skill.level, charskillid, skill.typeName, rank);
+	graphbox = drawLevelBox(skill.level, charskilllvl, skill.typeName, rank);
 	$('#skillbody').append(graphbox);
     }
 } 
 
+function formatTime (points) {
+  if (!points) {
+      return;
+  }
+  hours = points / 1800;
+  return parseInt(hours/24) + 'd ' + parseInt(hours%24) + 'h ' + parseInt(((hours%24) - parseInt(hours%24))*60) + 'm';
+}
+
 function drawLevelBox (neededLevel, currentLevel, skillName, rank) {
-    graph = '<tr><td>'+skillName+' (x'+rank+')</td>';
-    graph = graph + '<td><div style="background-color: transparent; width: 5.5em; text-align: center; height: 1.35em; letter-spacing: 2.25px;">';
+    if ((currentLevel) == 0) {
+      row = '<tr class="bg-red">';
+      trainingtime = formatTime(rank * 250 * Math.pow(5.66, (neededLevel-1)));
+    } else if ((neededLevel - currentLevel) > 0) {
+      row = '<tr class="bg-orange">';
+      pointdiff = (rank * 250 * Math.pow(5.66, (neededLevel-1))) - (rank * 250 * Math.pow(5.66, (currentLevel-1))) ;
+      trainingtime = formatTime(pointdiff);
+    } else {
+      row = '<tr>';
+      trainingtime = '';
+    }
+     
+    graph = row + '<td>'+skillName+' <small>(x'+rank+')</small></td>';
+    graph = graph + '<td style="width: 11em"><div style="background-color: transparent; width: 5.5em; text-align: center; height: 1.35em; letter-spacing: 2.25px;" class="pull-right">';
 
     if (currentLevel >= neededLevel) {
 	for (var i = 0; i < neededLevel; i++) {
@@ -328,7 +352,7 @@ function drawLevelBox (neededLevel, currentLevel, skillName, rank) {
 	    graph = graph + '<span class="fa fa-square-o text-green" style="vertical-align: text-top"></span>';
 	}
     }
-    graph = graph + '</div></td></tr>';
+    graph = graph + '</div><span class="pull-right"><small>' + trainingtime  + '</small> </span></td></tr>';
     return graph;
 }
 
