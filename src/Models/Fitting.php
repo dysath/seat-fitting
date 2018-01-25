@@ -13,7 +13,7 @@ class Fitting extends Model
 {
     public $timestamps = true;
 
-    protected $table = 'seat-fitting';
+    protected $table = 'seat_fitting';
 
     protected $fillable = ['id', 'shiptype', 'fitname', 'eftfitting'];
 }

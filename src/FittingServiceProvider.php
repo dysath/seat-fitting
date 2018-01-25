@@ -59,8 +59,8 @@ class FittingServiceProvider extends ServiceProvider
             'package.sidebar'
         );
 
-//        $this->mergeConfigFrom(
-//            __DIR__ . '/Config/fitting.permissions.php', 'web.permissions');
+        $this->mergeConfigFrom(
+            __DIR__ . '/Config/fitting.permissions.php', 'web.permissions');
     }
 
     public function add_publications()

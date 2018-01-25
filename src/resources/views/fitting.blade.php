@@ -8,7 +8,7 @@
         <div class="box-header">
            <h3 class="box-title">Fittings</h3>
            <span class="pull-right">
-               <button type="button" class="btn btn-xs btn-primary" id="addFitting">
+               <button type="button" class="btn btn-xs btn-primary" id="addFitting" data-toggle="tooltip" data-placement="top" title="Add a new fitting">
                    <span class="fa fa-plus-square"></span>
                </button>
            </span>
@@ -30,13 +30,13 @@
                  <td>{{ $fit['shiptype'] }}</td>
                  <td>{{ $fit['fitname'] }}</td>
                  <td class="no-hover pull-right">
-                     <button type="button" id="viewfit" class="btn btn-xs btn-success" data-id="{{ $fit['id'] }}">
+                     <button type="button" id="viewfit" class="btn btn-xs btn-success" data-id="{{ $fit['id'] }}" data-toggle="tooltip" data-placement="top" title="View Fitting">
                          <span class="fa fa-eye text-white"></span>
                      </button>
-                     <button type="button" id="editfit" class="btn btn-xs btn-warning" data-id="{{ $fit['id'] }}">
+                     <button type="button" id="editfit" class="btn btn-xs btn-warning" data-id="{{ $fit['id'] }}" data-toggle="tooltip" data-placement="top" title="Edit Fitting">
                          <span class="fa fa-pencil text-white"></span>
                      </button>
-                     <button type="button" id="deletefit" class="btn btn-xs btn-danger" data-id="{{ $fit['id'] }}">
+                     <button type="button" id="deletefit" class="btn btn-xs btn-danger" data-id="{{ $fit['id'] }}" data-toggle="tooltip" data-placement="top" title="Delete Fitting">
                          <span class="fa fa-trash text-white"></span>
                      </button>
                  </td>
