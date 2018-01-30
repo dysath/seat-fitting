@@ -7,7 +7,7 @@
     <div class="box box-primary box-solid">
         <div class="box-header">
            <h3 class="box-title">Fittings</h3>
-           @if (auth()->user()->has('fitting.create')) 
+           @if (auth()->user()->has('fitting.create'))
            <span class="pull-right">
                <button type="button" class="btn btn-xs btn-primary" id="addFitting" data-toggle="tooltip" data-placement="top" title="Add a new fitting">
                    <span class="fa fa-plus-square"></span>
@@ -26,26 +26,28 @@
              </thead>
              </tr>
              <tbody>
-             @foreach($fitlist as $fit)
-             <tr id="fitid" data-id="{{ $fit['id'] }}">
-                 <td><img src='https://image.eveonline.com/Type/{{ $fit['typeID'] }}_32.png' height='24' /></td>
-                 <td>{{ $fit['shiptype'] }}</td>
-                 <td>{{ $fit['fitname'] }}</td>
-                 <td class="no-hover pull-right">
-                     <button type="button" id="viewfit" class="btn btn-xs btn-success" data-id="{{ $fit['id'] }}" data-toggle="tooltip" data-placement="top" title="View Fitting">
-                         <span class="fa fa-eye text-white"></span>
-                     </button>
-                     @if (auth()->user()->has('fitting.create')) 
-                     <button type="button" id="editfit" class="btn btn-xs btn-warning" data-id="{{ $fit['id'] }}" data-toggle="tooltip" data-placement="top" title="Edit Fitting">
-                         <span class="fa fa-pencil text-white"></span>
-                     </button>
-                     <button type="button" id="deletefit" class="btn btn-xs btn-danger" data-id="{{ $fit['id'] }}" data-toggle="tooltip" data-placement="top" title="Delete Fitting">
-                         <span class="fa fa-trash text-white"></span>
-                     </button>
-                     @endif
-                 </td>
-             </tr>
-             @endforeach
+             @if(count($fitlist) > 0)
+               @foreach($fitlist as $fit)
+                 <tr id="fitid" data-id="{{ $fit['id'] }}">
+                     <td><img src='https://image.eveonline.com/Type/{{ $fit['typeID'] }}_32.png' height='24' /></td>
+                     <td>{{ $fit['shiptype'] }}</td>
+                     <td>{{ $fit['fitname'] }}</td>
+                     <td class="no-hover pull-right">
+                         <button type="button" id="viewfit" class="btn btn-xs btn-success" data-id="{{ $fit['id'] }}" data-toggle="tooltip" data-placement="top" title="View Fitting">
+                             <span class="fa fa-eye text-white"></span>
+                         </button>
+                         @if (auth()->user()->has('fitting.create'))
+                         <button type="button" id="editfit" class="btn btn-xs btn-warning" data-id="{{ $fit['id'] }}" data-toggle="tooltip" data-placement="top" title="Edit Fitting">
+                             <span class="fa fa-pencil text-white"></span>
+                         </button>
+                         <button type="button" id="deletefit" class="btn btn-xs btn-danger" data-id="{{ $fit['id'] }}" data-toggle="tooltip" data-placement="top" title="Delete Fitting">
+                             <span class="fa fa-trash text-white"></span>
+                         </button>
+                         @endif
+                     </td>
+                 </tr>
+               @endforeach
+             @endif
              </tbody>
         </table>
 
