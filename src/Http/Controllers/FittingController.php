@@ -89,19 +89,16 @@ class FittingController extends Controller
     {
        $fitnames = [];
    
-       $fittings = \Denngarr\Seat\Fitting\Models\Fitting::all();
+        $fittings = \Denngarr\Seat\Fitting\Models\Fitting::all();
 
-       if (count($fittings) === 0) {
-           return ["No fits found."];
-       } 
-       else {
-         foreach ($fittings as $fit) {
-           $ship = InvType::where('typeName', $fit->shiptype)->first();
-           array_push($fitnames, ['id' => $fit->id, 'shiptype' => $fit->shiptype, 'fitname' => $fit->fitname, 'typeID' => $ship->typeID]);
-         }
-       }
-//dd($fitnames);
-       return $fitnames;
+        if (count($fittings) > 0) {
+            foreach ($fittings as $fit) {
+                $ship = InvType::where('typeName', $fit->shiptype)->first();
+                array_push($fitnames, ['id' => $fit->id, 'shiptype' => $fit->shiptype, 'fitname' => $fit->fitname, 'typeID' => $ship->typeID]);
+            }
+            return $fitnames;
+        }
+        //dd($fitnames);
     }
 
     public function deleteFittingById($id)
@@ -318,6 +315,10 @@ class FittingController extends Controller
 
     private function modifyRequiredSkills($fitting)
     {
+        // skip this, if dogma extension isn't loaded
+        if (!extension_loaded('dogma'))
+            return;
+
         dogma_init_context($this->ctx);
         dogma_set_default_skill_level($this->ctx, 0);
 
@@ -347,9 +348,6 @@ class FittingController extends Controller
         while ($this->getAttribValue(self::DG_PGOUTPUT) < $this->getAttribValue(self::DG_PGLOAD) && $raise !== self::RAISE_CANNOT_RAISE) {
             $raise = $this->raiseSkill('powergrid');
         }
-
-        //\Log::warning("cpu: ".$this->getAttribValue($this->DG_CPULOAD)."/".$this->getAttribValue($this->DG_CPUOUTPUT));
-    //\Log::warning("pg: ".$this->getAttribValue($this->DG_PGLOAD)."/".$this->getAttribValue($this->DG_PGOUTPUT));
     }
 
     private function getAttribValue($attrib)
