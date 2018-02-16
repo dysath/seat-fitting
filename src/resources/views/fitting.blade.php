@@ -17,15 +17,16 @@
         </div>
         <div class="box-body">
         <table id='fitlist' class="table table-hover" style="vertical-align: top">
-            <tr>
             <thead>
+            <tr>
                 <th></th>
                 <th>Ship</th>
                 <th>Fit Name</th>
-                <th></th>
-             </thead>
+                <th class="pull-right">Option</th>
              </tr>
+             </thead>
              <tbody>
+             @if ($fitlist[0] != "No fits found.")
              @foreach($fitlist as $fit)
              <tr id="fitid" data-id="{{ $fit['id'] }}">
                  <td><img src='https://image.eveonline.com/Type/{{ $fit['typeID'] }}_32.png' height='24' /></td>
@@ -46,56 +47,65 @@
                  </td>
              </tr>
              @endforeach
+             @endif
              </tbody>
         </table>
-
-
-<div class="modal fade" tabindex="-1" role="dialog" id="fitEditModal">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header bg-primary">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title">Are you sure?</h4>
-      </div>
-      <form role="form" action="{{ route('fitting.saveFitting') }}" method="post">
-          <input type="hidden" id="fitSelection" name="fitSelection" value="0">
-          <div class="modal-body">
-              <p>Cut and Paste EFT fitting in the box below</p>
-              {{ csrf_field() }}
-              <textarea name="eftfitting" id="eftfitting" rows="15" style="width: 100%"></textarea>
-          </div>
-          <div class="modal-footer">
-              <div class="btn-group pull-right" role="group">
-                  <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                  <input type="submit" class="btn btn-primary" id="savefitting" value="Submit Fitting" />
-              </div>
-          </div>
-      </form>
-    </div><!-- /.modal-content -->
-  </div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
-
-<div class="modal fade" tabindex="-1" role="dialog" id="fitConfirmModal">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header bg-primary">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title">Are you sure?</h4>
-      </div>
-      <div class="modal-body">
-        <p>Are you sure you want to delete this fitting?</p>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-primary" id="deleteConfirm" data-dismiss="modal">Delete Fitting</button>
-      </div>
-    </div><!-- /.modal-content -->
-  </div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
-
-
         </div>
     </div>
+
+    <div class="box box-primary box-solid" id='eftexport'>
+        <div class="box-header">
+           <h3 class="box-title">EFT Fitting</h3>
+        </div>
+        <div class="box-body">
+            <textarea name="showeft" id="showeft" rows="15" style="width: 100%"></textarea>
+        </div>
+    </div>
+
+    <div class="modal fade" tabindex="-1" role="dialog" id="fitEditModal">
+       <div class="modal-dialog" role="document">
+         <div class="modal-content">
+           <div class="modal-header bg-primary">
+             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+             <h4 class="modal-title">Are you sure?</h4>
+           </div>
+           <form role="form" action="{{ route('fitting.saveFitting') }}" method="post">
+               <input type="hidden" id="fitSelection" name="fitSelection" value="0">
+               <div class="modal-body">
+                   <p>Cut and Paste EFT fitting in the box below</p>
+                   {{ csrf_field() }}
+                   <textarea name="eftfitting" id="eftfitting" rows="15" style="width: 100%"></textarea>
+               </div>
+               <div class="modal-footer">
+                   <div class="btn-group pull-right" role="group">
+                       <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                       <input type="submit" class="btn btn-primary" id="savefitting" value="Submit Fitting" />
+                   </div>
+              </div>
+           </form>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
+    <div class="modal fade" tabindex="-1" role="dialog" id="fitConfirmModal">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header bg-primary">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">Are you sure?</h4>
+          </div>
+          <div class="modal-body">
+            <p>Are you sure you want to delete this fitting?</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary" id="deleteConfirm" data-dismiss="modal">Delete Fitting</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
+
 @endsection
 @section('center')
     <div class="box box-primary box-solid" id="fitting-box">
@@ -187,6 +197,10 @@
 <script type="application/javascript">
 $('#fitting-box').hide();
 $('#skills-box').hide();
+$('#eftexport').hide();
+$('#showeft').val('');
+
+$('#fitlist').DataTable();
 
 $('#addFitting').on('click', function () {
     $('#fitEditModal').modal('show');
@@ -250,6 +264,7 @@ $('#fitlist').on('click', '#viewfit', function () {
         $('#highSlots, #midSlots, #lowSlots, #rigs, #cargo, #drones, #subSlots')
           .find('tbody')
           .empty();
+        $('#showeft').val('');
         $('#fitting-box').show();
         fillFittingWindow(result);
     });
@@ -360,6 +375,9 @@ function fillFittingWindow (result) {
     if (result) {
 	$('#fitting-window').show();
 	$('#middle-header').text(result.shipname + ', ' + result.fitname);
+        $('#showeft').val(result.eft);
+        $('#eftexport').show();
+
 	for (var slot in result) {
 
 	    if (slot.indexOf('HiSlot') >= 0)

@@ -43,5 +43,10 @@ Route::group([
             'uses' => 'FittingController@deleteFittingById',
             'middleware' => 'bouncer:fitting.create'
         ]);
+        Route::get('/doctrine', [
+            'as'   => 'fitting.doctrineview',
+            'uses' => 'DoctrineController@getDoctrineView',
+            'middleware' => 'bouncer:fitting.view'
+        ]);
     });
 });

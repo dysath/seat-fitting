@@ -6,5 +6,5 @@ return [
         'icon' => 'fa-rocket',
         'route_segment' => 'fitting',
         'route' => 'fitting.view',
-    ],
+    ]
 ];

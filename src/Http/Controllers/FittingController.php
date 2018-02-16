@@ -87,20 +87,21 @@ class FittingController extends Controller
 
     public function getFittingList()
     {
-        $fitnames = [];
+       $fitnames = [];
    
-        $fittings = \Denngarr\Seat\Fitting\Models\Fitting::all();
+       $fittings = \Denngarr\Seat\Fitting\Models\Fitting::all();
 
-        if (count($fittings) === 0) {
-            return ["No fits found."];
-        } else {
-            foreach ($fittings as $fit) {
-                $ship = InvType::where('typeName', $fit->shiptype)->first();
-                array_push($fitnames, ['id' => $fit->id, 'shiptype' => $fit->shiptype, 'fitname' => $fit->fitname, 'typeID' => $ship->typeID]);
-            }
-        }
-        //dd($fitnames);
-        return $fitnames;
+       if (count($fittings) === 0) {
+           return ["No fits found."];
+       } 
+       else {
+         foreach ($fittings as $fit) {
+           $ship = InvType::where('typeName', $fit->shiptype)->first();
+           array_push($fitnames, ['id' => $fit->id, 'shiptype' => $fit->shiptype, 'fitname' => $fit->fitname, 'typeID' => $ship->typeID]);
+         }
+       }
+//dd($fitnames);
+       return $fitnames;
     }
 
     public function deleteFittingById($id)
@@ -136,7 +137,7 @@ class FittingController extends Controller
                         $skillsToons['characters'][$index]['skill'][$skill->typeId]['level'] = 0;
                         $skillsToons['characters'][$index]['skill'][$skill->typeId]['rank'] = $rank->valueFloat;
                     }
-                }
+                }  
             }
         }
 
@@ -188,6 +189,7 @@ class FittingController extends Controller
     {
         $jsfit = [];
         $data = preg_split("/\r?\n\r?\n/", $eft);
+        $jsfit['eft'] = $eft;
 
         $lowslot = array_filter(preg_split("/\r?\n/", $data[0]));
         list($jsfit['shipname'], $jsfit['fitname']) = explode(",", substr(array_shift($lowslot), 1, -1));
@@ -198,6 +200,7 @@ class FittingController extends Controller
         
         if (($jsfit['shipname'] === 'Tengu') || ($jsfit['shipname'] === 'Loki') ||
             ($jsfit['shipname'] === 'Legion') || ($jsfit['shipname'] === 'Proteus')) {
+
             $subslot = array_filter(preg_split("/\r?\n/", $data[4]));
             if (count($data) > 5) {
                 $drones = array_filter(preg_split("/\r?\n/", $data[5]));
@@ -248,9 +251,11 @@ class FittingController extends Controller
         $index=0;
         foreach ($rigs as $slot) {
             $item = InvType::where('typeName', $slot)->first();
-            $jsfit['RigSlot'.$index]['id'] = $item->typeID;
-            $jsfit['RigSlot'.$index]['name'] = $slot;
-            $index++;
+            if (!empty($item)) {
+                $jsfit['RigSlot'.$index]['id'] = $item->typeID;
+                $jsfit['RigSlot'.$index]['name'] = $slot;
+                $index++;
+            }
         }
         
         if (isset($drones)) {
@@ -291,11 +296,14 @@ class FittingController extends Controller
                         $skillsToons['characters'][$index]['skill'][$skill->typeId]['level'] = 0;
                         $skillsToons['characters'][$index]['skill'][$skill->typeId]['rank'] = $rank->valueFloat;
                     }
-                }
+                }  
             }
         }
 
         return json_encode($skillsToons);
+
+
+
     }
 
     public function calculate($fitting)
