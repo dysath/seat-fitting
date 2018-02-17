@@ -98,7 +98,6 @@ class FittingController extends Controller
             }
             return $fitnames;
         }
-        //dd($fitnames);
     }
 
     public function deleteFittingById($id)
