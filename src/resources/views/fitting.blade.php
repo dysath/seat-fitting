@@ -26,7 +26,7 @@
              </tr>
              </thead>
              <tbody>
-             @if ($fitlist[0] != "No fits found.")
+             @if (count($fitlist) > 0)
              @foreach($fitlist as $fit)
              <tr id="fitid" data-id="{{ $fit['id'] }}">
                  <td><img src='https://image.eveonline.com/Type/{{ $fit['typeID'] }}_32.png' height='24' /></td>

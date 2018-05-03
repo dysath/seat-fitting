@@ -13,7 +13,7 @@ use Denngarr\Seat\Fitting\Models\Sde\DgmTypeAttributes;
 
 class FittingController extends Controller
 {
-    use UserRespository, Info, Skills;
+    use UserRespository, Skills, Info;
 
     // don't touch this, or you will lose your hands
     // see dgmAttributeTypes to know what they are
@@ -123,19 +123,25 @@ class FittingController extends Controller
         $fitting = Fitting::find($id);
         $skillsToons['skills'] = json_decode($this->calculate($fitting->eftfitting));
 
-        $characters = $this->getUserCharacters(auth()->user()->id);
+        $characters = [];
+        $characterIds = auth()->user()->associatedCharacterIds();
 
+        foreach ($characterIds as $characterId) {
+            $character = $this->getCharacterInformation($characterId);
+            array_push($characters, $character);
+        }
         foreach ($characters as $character) {
-            $index = $character->characterID;
-            $skillsToons['characters'][$index]['id']   = $character->characterID;
-            $skillsToons['characters'][$index]['name'] = $character->characterName;
+            $index = $character->character_id;
+            $skillsToons['characters'][$index]['id']   = $character->character_id;
+            $skillsToons['characters'][$index]['name'] = $character->name;
 
-            $characterSkills = $this->getCharacterSkillsInformation($character->characterID);
+            $characterSkills = $this->getCharacterSkillsInformation($character->character_id);
 
             foreach ($characterSkills as $skill) {
+
                 $rank = DgmTypeAttributes::where('typeID', $skill->typeID)->where('attributeID', '275')->first();
 
-                $skillsToons['characters'][$index]['skill'][$skill->typeID]['level'] = $skill->level;
+                $skillsToons['characters'][$index]['skill'][$skill->typeID]['level'] = $skill->trained_skill_level;
                 $skillsToons['characters'][$index]['skill'][$skill->typeID]['rank']  = $rank->valueFloat;
 
                 // Fill in missing skills so Javascript doesn't barf and you have the correct rank
