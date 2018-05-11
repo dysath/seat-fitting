@@ -7,7 +7,7 @@
     <div class="box box-primary box-solid">
         <div class="box-header">
            <h3 class="box-title">Fittings</h3>
-           @if (auth()->user()->has('fitting.create')) 
+           @if (auth()->user()->has('fitting.create', false)) 
            <span class="pull-right">
                <button type="button" class="btn btn-xs btn-primary" id="addFitting" data-toggle="tooltip" data-placement="top" title="Add a new fitting">
                    <span class="fa fa-plus-square"></span>

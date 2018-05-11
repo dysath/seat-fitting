@@ -51,8 +51,8 @@ class FittingServiceProvider extends ServiceProvider
      */
     public function register()
     {
-//        $this->mergeConfigFrom(
-//            __DIR__ . '/Config/fitting.config.php', 'fitting.config');
+        $this->mergeConfigFrom(
+            __DIR__ . '/Config/fitting.config.php', 'fitting.config');
 
         $this->mergeConfigFrom(
             __DIR__ . '/Config/fitting.sidebar.php',
