@@ -15,7 +15,7 @@ In your seat directory (By default:  /var/www/seat), type the following:
 php artisan down
 composer require denngarr/seat-srp
 
-php artisan vendor:publish --force
+php artisan vendor:publish --force --all
 php artisan migrate
 
 php artisan up
