@@ -213,8 +213,13 @@ class FittingController extends Controller
         $data = preg_split("/\r?\n\r?\n/", $eft);
         $jsfit['eft'] = $eft;
 
+        list($jsfit['shipname'], $jsfit['fitname']) = explode(",", substr($data[0], 1, -1));
+    
+        // Deal with a blank line between the name and the first low slot    
+        if (empty($lowslot)) 
+            $data = array_splice($data, 1, count($data));
+
         $lowslot = array_filter(preg_split("/\r?\n/", $data[0]));
-        list($jsfit['shipname'], $jsfit['fitname']) = explode(",", substr(array_shift($lowslot), 1, -1));
 
         $midslot = array_filter(preg_split("/\r?\n/", $data[1]));
         $highslot = array_filter(preg_split("/\r?\n/", $data[2]));
@@ -237,69 +242,81 @@ class FittingController extends Controller
         $index=0;
         foreach ($lowslot as $slot) {
             $module = explode(",", $slot);
-            $item = InvType::where('typeName', $module[0])->first();
+            if (!preg_match("/\[Empty .+ slot\]/", $module[0])) {
+                $item = InvType::where('typeName', $module[0])->first();
 
-            $jsfit['LoSlot' . $index] = [
-                'id'  => $item->typeID,
-                'name' => $module[0],
-            ];
+                $jsfit['LoSlot' . $index] = [
+                    'id'  => $item->typeID,
+                    'name' => $module[0],
+                ];
 
-            $index++;
+                $index++;
+            }
         }
+
         
         $index=0;
         foreach ($midslot as $slot) {
             $module = explode(",", $slot);
-            $item = InvType::where('typeName', $module[0])->first();
-
-            $jsfit['MedSlot' . $index] = [
-                'id'   => $item->typeID,
-                'name' => $module[0],
-            ];
-
-            $index++;
-        }
-
-        $index=0;
-        foreach ($highslot as $slot) {
-            $module = explode(",", $slot);
-            $item = InvType::where('typeName', $module[0])->first();
-
-            $jsfit['HiSlot' . $index] = [
-                'id'   => $item->typeID,
-                'name' => $module[0],
-            ];
-
-            $index++;
-        }
-
-        $index=0;
-        if (isset($subslot))
-            foreach ($subslot as $slot) {
-                $module = explode(",", $slot);
+            if (!preg_match("/\[Empty .+ slot\]/", $module[0])) {
                 $item = InvType::where('typeName', $module[0])->first();
 
-                $jsfit['SubSlot' . $index] = [
+                $jsfit['MedSlot' . $index] = [
                     'id'   => $item->typeID,
                     'name' => $module[0],
                 ];
 
                 $index++;
             }
+        }
+
+        $index=0;
+        foreach ($highslot as $slot) {
+            $module = explode(",", $slot);
+            if (!preg_match("/\[Empty .+ slot\]/", $module[0])) {
+                $item = InvType::where('typeName', $module[0])->first();
+
+                $jsfit['HiSlot' . $index] = [
+                    'id'   => $item->typeID,
+                    'name' => $module[0],
+                ];
+
+                $index++;
+            }
+        }
+
+        $index=0;
+        if (isset($subslot))
+            foreach ($subslot as $slot) {
+                $module = explode(",", $slot);
+                if (!preg_match("/\[Empty .+ slot\]/", $module[0])) {
+                    $item = InvType::where('typeName', $module[0])->first();
+
+                    $jsfit['SubSlot' . $index] = [
+                        'id'   => $item->typeID,
+                        'name' => $module[0],
+                    ];
+
+                    $index++;
+                }
+            }
         
         $index=0;
         foreach ($rigs as $slot) {
-            $item = InvType::where('typeName', $slot)->first();
 
-            if (empty($item))
-                continue;
+            if (!preg_match("/\[Empty .+ slot\]/", $slot)) {
+                $item = InvType::where('typeName', $slot)->first();
+            
+                if (empty($item))
+                    continue;
 
-            $jsfit['RigSlot'.$index] = [
-                'id'   => $item->typeID,
-                'name' => $slot,
-            ];
+                $jsfit['RigSlot'.$index] = [
+                    'id'   => $item->typeID,
+                    'name' => $slot,
+                ];
 
-            $index++;
+                 $index++;
+            }
         }
         
         if (! isset($drones))
@@ -553,6 +570,8 @@ class FittingController extends Controller
     private function sanatizeFittingBlock($fitting)
     {
         // remove useless empty lines and whatnot
+
+        $fitting = preg_replace("/\[Empty .+ slot\]/", "", $fitting);
         return ltrim(rtrim(preg_replace("/^[ \t]*[\r\n]+/m", "", $fitting)));
     }
 

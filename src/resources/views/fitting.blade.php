@@ -36,7 +36,7 @@
                      <button type="button" id="viewfit" class="btn btn-xs btn-success" data-id="{{ $fit['id'] }}" data-toggle="tooltip" data-placement="top" title="View Fitting">
                          <span class="fa fa-eye text-white"></span>
                      </button>
-                     @if (auth()->user()->has('fitting.create')) 
+                     @if (auth()->user()->has('fitting.create', false)) 
                      <button type="button" id="editfit" class="btn btn-xs btn-warning" data-id="{{ $fit['id'] }}" data-toggle="tooltip" data-placement="top" title="Edit Fitting">
                          <span class="fa fa-pencil text-white"></span>
                      </button>
