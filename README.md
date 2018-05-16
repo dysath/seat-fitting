@@ -13,7 +13,7 @@ In your seat directory (By default:  /var/www/seat), type the following:
 
 ```
 php artisan down
-composer require denngarr/seat-srp
+composer require denngarr/seat-fitting
 
 php artisan vendor:publish --force
 php artisan migrate
