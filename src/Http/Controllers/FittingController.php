@@ -7,6 +7,7 @@ use Seat\Services\Repositories\Character\Info;
 use Seat\Services\Repositories\Character\Skills;
 use Seat\Services\Repositories\Configuration\UserRespository;
 use Seat\Web\Http\Controllers\Controller;
+use Seat\Eveapi\Models\Character\CharacterInfo;
 use Denngarr\Seat\Fitting\Validation\FittingValidation;
 use Denngarr\Seat\Fitting\Models\Sde\InvType;
 use Denngarr\Seat\Fitting\Models\Sde\DgmTypeAttributes;
@@ -127,10 +128,15 @@ class FittingController extends Controller
         $characterIds = auth()->user()->associatedCharacterIds();
 
         foreach ($characterIds as $characterId) {
-            $character = $this->getCharacterInformation($characterId);
-            array_push($characters, $character);
+            $character = CharacterInfo::where('character_id', $characterId)->first();
+
+            // Sometimes you'll have character_id associated, but the update job hasn't run.
+            if ($character != null) {
+                array_push($characters, $character);
+            }
         }
         foreach ($characters as $character) {
+
             $index = $character->character_id;
             $skillsToons['characters'][$index]['id']   = $character->character_id;
             $skillsToons['characters'][$index]['name'] = $character->name;
@@ -212,15 +218,19 @@ class FittingController extends Controller
         $jsfit = [];
         $data = preg_split("/\r?\n\r?\n/", $eft);
         $jsfit['eft'] = $eft;
+     
+        $header = preg_split("/\r?\n/", $data[0]);
 
-        list($jsfit['shipname'], $jsfit['fitname']) = explode(",", substr($data[0], 1, -1));
-    
+        list($jsfit['shipname'], $jsfit['fitname']) = explode(",", substr($header[0], 1, -1));
+        array_shift($header); 
+        $data[0] = implode("\r\n", $header);
+
         // Deal with a blank line between the name and the first low slot    
+        $lowslot = array_filter(preg_split("/\r?\n/", $data[0]));
         if (empty($lowslot)) 
             $data = array_splice($data, 1, count($data));
 
         $lowslot = array_filter(preg_split("/\r?\n/", $data[0]));
-
         $midslot = array_filter(preg_split("/\r?\n/", $data[1]));
         $highslot = array_filter(preg_split("/\r?\n/", $data[2]));
         $rigs = array_filter(preg_split("/\r?\n/", $data[3]));
