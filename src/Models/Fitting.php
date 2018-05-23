@@ -1,9 +1,4 @@
 <?php
-/**
- * User: Warlof Tutsimo <loic.leuilliot@gmail.com>
- * Date: 29/12/2017
- * Time: 15:13
- */
 
 namespace Denngarr\Seat\Fitting\Models;
 
@@ -16,4 +11,12 @@ class Fitting extends Model
     protected $table = 'seat_fitting';
 
     protected $fillable = ['id', 'shiptype', 'fitname', 'eftfitting'];
+
+
+    public function doctrines()
+    {
+
+        return $this->belongsToMany(Doctrine::class, 'seat_doctrine_fitting');
+
+    }
 }

@@ -3,12 +3,15 @@
 namespace Denngarr\Seat\Fitting\Http\Controllers;
 
 use Denngarr\Seat\Fitting\Models\Fitting;
+use Denngarr\Seat\Fitting\Models\Doctrine;
 use Seat\Services\Repositories\Character\Info;
 use Seat\Services\Repositories\Character\Skills;
 use Seat\Services\Repositories\Configuration\UserRespository;
 use Seat\Web\Http\Controllers\Controller;
+use Seat\Web\Models\Acl\Role;
 use Seat\Eveapi\Models\Character\CharacterInfo;
 use Denngarr\Seat\Fitting\Validation\FittingValidation;
+use Denngarr\Seat\Fitting\Validation\DoctrineValidation;
 use Denngarr\Seat\Fitting\Models\Sde\InvType;
 use Denngarr\Seat\Fitting\Models\Sde\DgmTypeAttributes;
 
@@ -111,6 +114,88 @@ class FittingController extends Controller
         return $fitnames;
     }
 
+    public function getDoctrineEdit($doctrine_id) 
+    {
+        $selected = [];
+        $unselected = [];
+        $doctrine_fits = [];
+        $fittings = Fitting::all();
+
+        $doctrine_fittings = Doctrine::find($doctrine_id)->fittings()->get();
+
+        foreach ($doctrine_fittings as $doctrine_fitting) {
+            array_push($doctrine_fits, $doctrine_fitting->id);
+        }       
+
+        foreach ($fittings as $fitting) {
+            $ship = InvType::where('typeName', $fitting->shiptype)->first();
+
+            if (array_search($fitting->id, $doctrine_fits) !== false) {
+                array_push($selected, [
+                    'id' => $fitting->id,
+                    'shiptype' => $fitting->shiptype,
+                    'fitname' => $fitting->fitname,
+                    'typeID' => $ship->typeID
+                ]);
+            }
+            else {
+                array_push($unselected, [
+                    'id' => $fitting->id,
+                    'shiptype' => $fitting->shiptype,
+                    'fitname' => $fitting->fitname,
+                    'typeID' => $ship->typeID
+                ]);
+            }
+        }
+        return [$selected, $unselected, $doctrine_id, Doctrine::find($doctrine_id)->name];
+    }
+
+    public function getDoctrineList() 
+    {
+         $doctrine_names = [];
+
+         $doctrines = Doctrine::all();
+         
+         if (count($doctrines) > 0) {
+
+             foreach ($doctrines as $doctrine) {
+                 array_push($doctrine_names, [
+                     'id' => $doctrine->id,
+                     'name' => $doctrine->name
+                     ]);
+             }
+         }   
+
+         return $doctrine_names;
+    }
+
+    public function getDoctrineById($id)
+    {
+        $fitting_list = [];
+        $doctrine = Doctrine::find($id);
+
+        $fittings = $doctrine->fittings()->get();
+
+        foreach ($fittings as $fitting) {
+          $ship = InvType::where('typeName', $fitting->shiptype)->first();
+
+          array_push($fitting_list, [
+              'id' => $fitting->id,
+              'name' => $fitting->fitname,
+              'shipType' => $fitting->shiptype, 
+              'shipImg' => $ship->typeID 
+          ]);
+        }
+        return $fitting_list;
+    }
+
+    public function delDoctrineById($id)
+    {
+        Doctrine::destroy($id);
+
+        return "Success";
+    }
+
     public function deleteFittingById($id)
     {
         Fitting::destroy($id);
@@ -185,6 +270,13 @@ class FittingController extends Controller
         $fitlist = $this->getFittingList();
 
         return view('fitting::fitting', compact('fitlist'));
+    }
+
+    public function getDoctrineView()
+    {
+        $doctrine_list = $this->getDoctrineList();
+
+        return view('fitting::doctrine', compact('doctrine_list'));
     }
 
     public function saveFitting(FittingValidation $request)
@@ -624,4 +716,28 @@ class FittingController extends Controller
 
         return $itemNames;
     }
+
+    public function getRoleList()
+    {
+        return Role::all();
+    }
+
+    public function saveDoctrine(DoctrineValidation $request)
+    {
+        if ($request->doctrineid > 0) {
+            $doctrine = Doctrine::find($request->doctrineid);
+        } else {
+            $doctrine = new Doctrine;
+        }
+        $doctrine->name = $request->doctrinename;
+        $doctrine->save();
+
+        foreach ($request->selectedFits as $fitId) {
+            $doctrine->fittings()->sync($request->selectedFits);
+        }
+
+        return redirect()->route('fitting.doctrineview');
+    }
+
+
 }

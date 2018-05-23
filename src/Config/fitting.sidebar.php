@@ -6,5 +6,13 @@ return [
         'icon' => 'fa-rocket',
         'route_segment' => 'fitting',
         'route' => 'fitting.view',
+        'permission' => 'fitting.view'
+    ],
+    'doctrine' => [
+        'name' => 'Doctrine',
+        'icon' => 'fa-rocket',
+        'route_segment' => 'fitting',
+        'route' => 'fitting.doctrineview',
+        'permission' => 'fitting.view'
     ]
 ];
