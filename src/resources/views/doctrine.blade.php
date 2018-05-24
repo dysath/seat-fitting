@@ -469,10 +469,12 @@ $('#newDoctrine').on('click', function () {
 });
 
 $('#editDoctrine').on('click', function () {
+    id = $('#doctrineSpinner').find(":selected").val();
+
     $.ajax({
         headers: function () {
         },
-        url: "/fitting/getdoctrineedit/" + $('#doctrineSpinner').find(":selected").val(),
+        url: "/fitting/getdoctrineedit/" + id,
         type: "GET",
         datatype: 'json',
         timeout: 10000
@@ -481,6 +483,7 @@ $('#editDoctrine').on('click', function () {
         $.each(result[1], function(key, value) {
             $('#listoffits').append($("<option></option>").attr("value", value.id).text(value.fitname + " -- " + value.shiptype));
         });
+        $('#selectedFits').empty();
         $.each(result[0], function(key, value) {
             $('#selectedFits').append($("<option></option>").attr("value", value.id).text(value.fitname + " -- " + value.shiptype));
         });
