@@ -24,8 +24,8 @@
           @endforeach
           </select>
           <div class="input-group-btn">
-          @if (auth()->user()->has('fitting.create', false)) 
-          <button type="button" id="editDoctrine" class="btn btn-warning" data-id="" data-toggle="modal" data-target="#addDoctrine" data-toggle="tooltip" data-placement="top" title="Edit Doctrine">
+          @if ((auth()->user()->has('fitting.create', false)) && (!empty($doctrine_list)))
+          <button type="button" id="editDoctrine" class="btn btn-warning" data-id="" data-toggle="modal" data-target="#addDoctrine" data-toggle="tooltip" data-placement="top" title="Edit Doctrine" inactive>
               <span class="fa fa-pencil text-white"></span>
           </button>
           <button type="button" id="deleteDoctrine" class="btn btn-danger" data-id="" data-toggle="tooltip" data-placement="top" title="Delete Doctrine">
@@ -239,7 +239,6 @@ $('#deleteDoctrineConfirm').on('click', function () {
         datatype: 'json',
 	timeout: 10000
     }).done( function (result) {
-alert(id);
         $('#fitlist #fitid[data-id="'+id+'"]').remove();
     }).fail( function(xmlHttpRequest, textStatus, errorThrown) {
     });
