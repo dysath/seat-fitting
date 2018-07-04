@@ -10,6 +10,7 @@ use Seat\Services\Repositories\Configuration\UserRespository;
 use Seat\Web\Http\Controllers\Controller;
 use Seat\Web\Models\Acl\Role;
 use Seat\Eveapi\Models\Character\CharacterInfo;
+use Seat\Eveapi\Models\Corporation\CorporationInfo;
 use Denngarr\Seat\Fitting\Validation\FittingValidation;
 use Denngarr\Seat\Fitting\Validation\DoctrineValidation;
 use Denngarr\Seat\Fitting\Models\Sde\InvType;
@@ -484,6 +485,7 @@ class FittingController extends Controller
 
     public function calculate($fitting)
     {
+
         $items = $this->parseEftFitting($fitting);
         $item_ids = $this->getUniqueTypeIDs($items['all_item_types']);
         $this->getReqSkillsByTypeIDs($item_ids);
@@ -739,5 +741,98 @@ class FittingController extends Controller
         return redirect()->route('fitting.doctrineview');
     }
 
+    public function viewDoctrineReport() 
+    {
+        $doctrines = Doctrine::all();
 
+        $corps = CorporationInfo::all();
+
+        return view('fitting::doctrinereport', compact('doctrines', 'corps'));
+    }
+
+    public function runReport($corp_id, $doctrine_id)
+    {
+        $characters = CharacterInfo::where('corporation_id', $corp_id)->get();
+        $doctrine = Doctrine::where('id', $doctrine_id)->first();
+        $fittings = $doctrine->fittings;
+
+        $charData = [];
+        $fitData = [];
+        
+        $data = [];
+        $data['fittings'] = [];
+
+        foreach ($characters as $character) {
+            $characterSkills = $this->getCharacterSkillsInformation($character->character_id);
+
+            $charData[$character->character_id]['name'] = $character->name;
+            $charData[$character->character_id]['skills'] = [];
+
+            foreach ($characterSkills as $skill) {
+                $charData[$character->character_id]['skills'][$skill->skill_id] = $skill->trained_skill_level;
+            }
+        }
+        foreach ($fittings as $fitting) {
+            $fit = Fitting::find($fitting->id);
+            
+            array_push($data['fittings'], $fit->fitname);
+            
+            $this->requiredSkills = [];
+            $shipSkills = json_decode($this->calculate("[".$fit->shiptype.", a]"));
+
+            foreach ($shipSkills as $shipSkill) {
+                $fitData[$fitting->id]['shipskills'][$shipSkill->typeId] = $shipSkill->level;
+            }
+
+            $this->requiredSkills = [];
+            $fitSkills = json_decode($this->calculate($fit->eftfitting));
+
+            $fitData[$fitting->id]['name'] = $fit->fitname;
+            foreach ($fitSkills as $fitSkill) {
+                $fitData[$fitting->id]['skills'][$fitSkill->typeId] = $fitSkill->level;
+            }
+        }
+
+        foreach ($charData as $char) {
+   
+            foreach ($fitData as $fit) {
+                $canflyfit = true;
+                $canflyship = true;
+
+                foreach ($fit['skills'] as $skill_id => $level) {
+                    if (isset($char['skills'][$skill_id])) {
+                        if ($char['skills'][$skill_id] < $level) {
+                            $canflyfit = false; 
+                        }
+                    } else {
+                        $canflyfit = false; 
+                    }
+                }
+
+                foreach ($fit['shipskills'] as $skill_id => $level) {
+                    if (isset($char['skills'][$skill_id])) {
+                        if ($char['skills'][$skill_id] < $level) {
+                            $canflyship = false; 
+                        }
+                    } else {
+                        $canflyship = false; 
+                    }
+                }
+         
+                $data['chars'][$char['name']][$fit['name']]['ship'] = true;
+
+                if ($canflyship) {
+                    $data['chars'][$char['name']][$fit['name']]['ship'] = true;
+                } else {
+                    $data['chars'][$char['name']][$fit['name']]['ship'] = false;
+                } 
+                if ($canflyfit) {
+                    $data['chars'][$char['name']][$fit['name']]['fit'] = true;
+                } else {
+                    $data['chars'][$char['name']][$fit['name']]['fit'] = false;
+                } 
+            }
+        }
+        return json_encode($data);
+    }
 }

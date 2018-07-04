@@ -78,5 +78,15 @@ Route::group([
             'uses' => 'FittingController@delDoctrineById',
             'middleware' => 'bouncer:fitting.view'
         ]);
+        Route::get('/doctrineReport', [
+            'as'   => 'fitting.doctrinereport',
+            'uses' => 'FittingController@viewDoctrineReport',
+            'middleware' => 'bouncer:fitting.view'
+        ]);
+        Route::get('/runReport/{corpid}/{doctrineid}', [
+            'as'   => 'fitting.runreport',
+            'uses' => 'FittingController@runReport',
+            'middleware' => 'bouncer:fitting.view'
+        ]);
     });
 });
