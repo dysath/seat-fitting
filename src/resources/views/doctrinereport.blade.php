@@ -52,6 +52,8 @@ $('#runreport').on('click', function () {
         timeout: 10000
     }).done( function (result) {
        result = JSON.parse(result);
+       $('#report').find("thead").empty();
+       $('#report').find("tbody").empty();
        header = "<tr><th>Character</th>";
        for (var fit in result.fittings) {
            header = header + "<th style='text-align: center'>" + result.fittings[fit] + "</th>";
@@ -63,14 +65,14 @@ $('#runreport').on('click', function () {
            body = "<tr><td>"+char+"</td>";
            for (var ships in result.chars[char]) {
                if (result.chars[char][ships].ship == true) {
-                   body = body + "<td style='text-align: center; width: 10em;'>yes/";
+                   body = body + "<td style='text-align: center; width: 10em;'><span style='font-weight: bold; color: green;'>YES</span>/";
                } else {
-                   body = body + "<td style='text-align: center; width: 10em;'>no/";
+                   body = body + "<td style='text-align: center; width: 10em;'><span style='font-weight: bold; color: red;'>NO</span>/";
                } 
                if (result.chars[char][ships].fit == true) {
-                   body = body + "yes</td>";
+                   body = body + "<span style='font-weight: bold; color: green;'>YES</span></td>";
                } else {
-                   body = body + "no</td>";
+                   body = body + "<span style='font-weight: bold; color: red;'>NO</span></td>";
                } 
            }
            body = body + "</tr>";
