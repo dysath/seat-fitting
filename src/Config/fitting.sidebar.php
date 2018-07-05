@@ -19,14 +19,14 @@ return [
                 'icon' => 'fa-rocket',
                 'route_segment' => 'fitting',
                 'route' => 'fitting.doctrineview',
-                'permission' => 'fitting.view'
+                'permission' => 'fitting.doctrineview'
             ],
             'doctrinereport' => [
                 'name' => 'Doctrine Report',
                 'icon' => 'fa-notepad',
                 'route_segment' => 'fitting',
                 'route' => 'fitting.doctrinereport',
-                'permission' => 'fitting.view'
+                'permission' => 'fitting.reportview'
             ],
         ]
     ]

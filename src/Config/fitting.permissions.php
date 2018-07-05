@@ -8,6 +8,8 @@
 return [
     'fitting' => [
         'view',
-        'create'
+        'create',
+        'doctrineview',
+        'reportview'
     ]
 ];

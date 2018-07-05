@@ -29,12 +29,12 @@ Route::group([
         ]);
         Route::get('/getfittingbyid/{id}', [
             'uses' => 'FittingController@getFittingById',
-            'middleware' => 'bouncer:fitting.view'
+            'middleware' => 'bouncer:fitting.doctrineview'
         ]);
         Route::get('/getdoctrinebyid/{id}', [
             'as'   => 'fitting.getDoctrineById',
             'uses' => 'FittingController@getDoctrineById',
-            'middleware' => 'bouncer:fitting.view'
+            'middleware' => 'bouncer:fitting.doctrineview'
         ]);
         Route::get('/geteftfittingbyid/{id}', [
             'uses' => 'FittingController@getEftFittingById',
@@ -42,7 +42,7 @@ Route::group([
         ]);
         Route::get('/getskillsbyfitid/{id}', [
             'uses' => 'FittingController@getSkillsByFitId',
-            'middleware' => 'bouncer:fitting.view'
+            'middleware' => 'bouncer:fitting.doctrineview'
         ]);
         Route::get('/delfittingbyid/{id}', [
             'uses' => 'FittingController@deleteFittingById',
@@ -51,7 +51,7 @@ Route::group([
         Route::get('/doctrine', [
             'as'   => 'fitting.doctrineview',
             'uses' => 'FittingController@getDoctrineView',
-            'middleware' => 'bouncer:fitting.view'
+            'middleware' => 'bouncer:fitting.doctrineview'
         ]);
         Route::get('/fittinglist', [
             'as'   => 'fitting.fitlist',
@@ -66,27 +66,27 @@ Route::group([
         Route::post('/addDoctrine', [
             'as'   => 'fitting.addDoctrine',
             'uses' => 'FittingController@saveDoctrine',
-            'middleware' => 'bouncer:fitting.view'
+            'middleware' => 'bouncer:fitting.create'
         ]);
         Route::get('/getdoctrineedit/{id}', [
             'as'   => 'fitting.getDoctrineEdit',
             'uses' => 'FittingController@getDoctrineEdit',
-            'middleware' => 'bouncer:fitting.view'
+            'middleware' => 'bouncer:fitting.create'
         ]);
         Route::get('/deldoctrinebyid/{id}', [
             'as'   => 'fitting.delDoctrineById',
             'uses' => 'FittingController@delDoctrineById',
-            'middleware' => 'bouncer:fitting.view'
+            'middleware' => 'bouncer:fitting.create'
         ]);
         Route::get('/doctrineReport', [
             'as'   => 'fitting.doctrinereport',
             'uses' => 'FittingController@viewDoctrineReport',
-            'middleware' => 'bouncer:fitting.view'
+            'middleware' => 'bouncer:fitting.reportview'
         ]);
         Route::get('/runReport/{corpid}/{doctrineid}', [
             'as'   => 'fitting.runreport',
             'uses' => 'FittingController@runReport',
-            'middleware' => 'bouncer:fitting.view'
+            'middleware' => 'bouncer:fitting.reportview'
         ]);
     });
 });
