@@ -761,6 +761,7 @@ class FittingController extends Controller
         
         $data = [];
         $data['fittings'] = [];
+        $data['totals'] = [];
 
         foreach ($characters as $character) {
             $characterSkills = $this->getCharacterSkillsInformation($character->character_id);
@@ -792,7 +793,7 @@ class FittingController extends Controller
                 $fitData[$fitting->id]['skills'][$fitSkill->typeId] = $fitSkill->level;
             }
         }
-
+        
         foreach ($charData as $char) {
    
             foreach ($fitData as $fit) {
@@ -819,20 +820,27 @@ class FittingController extends Controller
                     }
                 }
          
-                $data['chars'][$char['name']][$fit['name']]['ship'] = true;
-
                 if ($canflyship) {
                     $data['chars'][$char['name']][$fit['name']]['ship'] = true;
+                    if (!isset($data['totals'][$fit['name']]['ship'])) {
+                         $data['totals'][$fit['name']]['ship'] = 0;
+                    }
+                    $data['totals'][$fit['name']]['ship']++;
                 } else {
                     $data['chars'][$char['name']][$fit['name']]['ship'] = false;
                 } 
                 if ($canflyfit) {
                     $data['chars'][$char['name']][$fit['name']]['fit'] = true;
+                    if (!isset($data['totals'][$fit['name']]['fit'])) {
+                         $data['totals'][$fit['name']]['fit'] = 0;
+                    }
+                    $data['totals'][$fit['name']]['fit']++;
                 } else {
                     $data['chars'][$char['name']][$fit['name']]['fit'] = false;
                 } 
             }
         }
+        $data['totals']['chars'] = count($charData);
         return json_encode($data);
     }
 }
