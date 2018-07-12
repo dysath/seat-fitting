@@ -118,6 +118,7 @@ $('#runreport').on('click', function () {
            $('#report').find("tbody").append(body);
        }
        $('#report').DataTable( {
+           "destroy": true,
            "order": [[ 0, "asc" ]],
            "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]]
        });
