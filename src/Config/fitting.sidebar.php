@@ -16,14 +16,14 @@ return [
             ],
             'doctrine' => [
                 'name' => 'Doctrine',
-                'icon' => 'fa-rocket',
+                'icon' => 'fa-list',
                 'route_segment' => 'fitting',
                 'route' => 'fitting.doctrineview',
                 'permission' => 'fitting.doctrineview'
             ],
             'doctrinereport' => [
                 'name' => 'Doctrine Report',
-                'icon' => 'fa-notepad',
+                'icon' => 'fa-pie-chart',
                 'route_segment' => 'fitting',
                 'route' => 'fitting.doctrinereport',
                 'permission' => 'fitting.reportview'

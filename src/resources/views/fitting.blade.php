@@ -8,11 +8,11 @@
         <div class="box-header">
            <h3 class="box-title">Fittings</h3>
            @if (auth()->user()->has('fitting.create', false)) 
-           <span class="pull-right">
-               <button type="button" class="btn btn-xs btn-primary" id="addFitting" data-toggle="tooltip" data-placement="top" title="Add a new fitting">
+           <div class="box-tools pull-right">
+               <button type="button" class="btn btn-xs btn-box-tool" id="addFitting" data-toggle="tooltip" data-placement="top" title="Add a new fitting">
                    <span class="fa fa-plus-square"></span>
                </button>
-           </span>
+           </div>
            @endif
         </div>
         <div class="box-body">
@@ -195,220 +195,221 @@
 
 @push('javascript')
 <script type="application/javascript">
-$('#fitting-box').hide();
-$('#skills-box').hide();
-$('#eftexport').hide();
-$('#showeft').val('');
+    var skills_informations;
 
-$('#fitlist').DataTable();
+    $('#fitting-box').hide();
+    $('#skills-box').hide();
+    $('#eftexport').hide();
+    $('#showeft').val('');
 
-$('#addFitting').on('click', function () {
-    $('#fitEditModal').modal('show');
-    $('#fitSelection').val('0');
-    $('textarea#eftfitting').val('');
-});
+    $('#fitlist').DataTable();
 
-$('#fitlist').on('click', '#deletefit', function () {
-    $('#fitConfirmModal').modal('show');
-    $('#fitSelection').val($(this).data('id'));
-});
-
-$('#fitlist').on('click', '#editfit', function () {
-    $('#fitEditModal').modal('show');
-    id = $(this).data('id');
-    $('#fitSelection').val(id);
-    $.ajax({
-	headers: function () {
-	},
-	url: "/fitting/geteftfittingbyid/"+id,
-	type: "GET",
-        datatype: 'string',
-	timeout: 10000
-    }).done( function (result) {
-      $('textarea#eftfitting').val(result);
-    }).fail( function(xmlHttpRequest, textStatus, errorThrown) {
+    $('#addFitting').on('click', function () {
+        $('#fitEditModal').modal('show');
+        $('#fitSelection').val('0');
+        $('textarea#eftfitting').val('');
     });
-});
 
-$('#deleteConfirm').on('click', function () {    
-   id = $('#fitSelection').val();
-    $('#fitlist #fitid[data-id="'+id+'"]').remove();
-    $.ajax({
-	headers: function () {
-	},
-	url: "/fitting/delfittingbyid/"+id,
-	type: "GET",
-        datatype: 'json',
-	timeout: 10000
-    }).done( function (result) {
-        $('#fitlist #fitid[data-id="'+id+'"]').remove();
-    }).fail( function(xmlHttpRequest, textStatus, errorThrown) {
-    });
-});
+    $('#fitlist').on('click', '#deletefit', function () {
+        $('#fitConfirmModal').modal('show');
+        $('#fitSelection').val($(this).data('id'));
+    }).on('click', '#editfit', function () {
+        id = $(this).data('id');
+        $('#fitEditModal').modal('show');
+        $('#fitSelection').val(id);
 
-$('#fitlist').on('click', '#viewfit', function () {
-    $('#highSlots, #midSlots, #lowSlots, #rigs, #cargo, #drones, #subSlots')
-	.find('tbody')
-	.empty();
-    $('#fittingId').text($(this).data('id'));
-
-    uri = "['id' => " + $(this).data('id') +"]";
-    $.ajax({
-        headers: function () {
-        },
-        url: "/fitting/getfittingbyid/"+$(this).data('id'),
-        type: "GET",
-        dataType: 'json',
-        timeout: 10000
-    }).done( function (result) {
+        $.ajax({
+            headers: function () {
+            },
+            url: "/fitting/geteftfittingbyid/" + id,
+            type: "GET",
+            datatype: 'string',
+            timeout: 10000
+        }).done( function (result) {
+          $('textarea#eftfitting').val(result);
+        }).fail( function(xmlHttpRequest, textStatus, errorThrown) {
+        });
+    }).on('click', '#viewfit', function () {
+        uri = "['id' => " + $(this).data('id') +"]";
         $('#highSlots, #midSlots, #lowSlots, #rigs, #cargo, #drones, #subSlots')
-          .find('tbody')
-          .empty();
-        $('#showeft').val('');
-        $('#fitting-box').show();
-        fillFittingWindow(result);
-    });
+            .find('tbody')
+            .empty();
+        $('#fittingId').text($(this).data('id'));
 
-    $.ajax({
-        headers: function () {
-        },
-        url: "/fitting/getskillsbyfitid/"+$(this).data('id'),
-        type: "GET",
-        dataType: 'json',
-        timeout: 10000
-    }).done( function (result) {
-        if (result) {
-            $('#skills-box').show();
-            $('#skillbody').empty();
-	  
-            if ($('#characterSpinner option').size() === 0) {
-                for (var toons in result.characters) {
-                     $('#characterSpinner').append('<option value="'+result.characters[toons].id+'">'+result.characters[toons].name+'</option>');
+        $.ajax({
+            headers: function () {
+            },
+            url: "/fitting/getfittingbyid/"+$(this).data('id'),
+            type: "GET",
+            dataType: 'json',
+            timeout: 10000
+        }).done( function (result) {
+            $('#highSlots, #midSlots, #lowSlots, #rigs, #cargo, #drones, #subSlots')
+                .find('tbody')
+                .empty();
+            $('#showeft').val('');
+            $('#fitting-box').show();
+
+            fillFittingWindow(result);
+        });
+
+        $.ajax({
+            headers: function () {
+            },
+            url: "/fitting/getskillsbyfitid/"+$(this).data('id'),
+            type: "GET",
+            dataType: 'json',
+            timeout: 10000
+        }).done( function (result) {
+            if (result) {
+                skills_informations = result;
+
+                $('#skills-box').show();
+                $('#skillbody').empty();
+
+                if ($('#characterSpinner option').size() === 0) {
+                    for (var toons in result.characters) {
+                        $('#characterSpinner').append('<option value="'+result.characters[toons].id+'">'+result.characters[toons].name+'</option>');
+                    }
                 }
-            }
-            fillSkills(result);
-        }
-    });
-});
 
-$('#characterSpinner').change( function () {
-    $.ajax({
-        headers: function () {
-        },
-        url: "/fitting/getskillsbyfitid/"+$('#fittingId').text(),
-        type: "GET",
-        dataType: 'json',
-        timeout: 10000
-    }).done( function (result) {
-        if (result) {
+                fillSkills(result);
+            }
+        });
+    });
+
+    $('#deleteConfirm').on('click', function () {
+       id = $('#fitSelection').val();
+        $('#fitlist #fitid[data-id="'+id+'"]').remove();
+
+        $.ajax({
+            headers: function () {
+            },
+            url: "/fitting/delfittingbyid/" + id,
+            type: "GET",
+                datatype: 'json',
+            timeout: 10000
+        }).done( function (result) {
+            $('#fitlist #fitid[data-id="'+id+'"]').remove();
+        }).fail( function(xmlHttpRequest, textStatus, errorThrown) {
+        });
+    });
+
+    $('#characterSpinner').change( function () {
+        if (skills_informations) {
             $('#skills-box').show();
             $('#skillbody').empty();
-            fillSkills(result);
+
+            fillSkills(skills_informations);
         }
     });
-});
 
-function fillSkills (result) {
+    function fillSkills (result) {
 
-    characterId = $('#characterSpinner').find(":selected").val();
-    for (var skills in result.skills) {
-	skill = result.skills[skills];
-	if (typeof result.characters[characterId].skill[skill.typeId] != "undefined") {
-	    charskilllvl = result.characters[characterId].skill[skill.typeId].level;
-	    rank = result.characters[characterId].skill[skill.typeId].rank;
-	}
-	graphbox = drawLevelBox(skill.level, charskilllvl, skill.typeName, rank);
-	$('#skillbody').append(graphbox);
+        characterId = $('#characterSpinner').find(":selected").val();
+
+        for (skills in result.skills) {
+            skill = result.skills[skills];
+
+            if (typeof result.characters[characterId].skill[skill.typeId] !== "undefined") {
+                charskilllvl = result.characters[characterId].skill[skill.typeId].level;
+                rank = result.characters[characterId].skill[skill.typeId].rank;
+            }
+
+            graphbox = drawLevelBox(skill.level, charskilllvl, skill.typeName, rank);
+            $('#skillbody').append(graphbox);
+        }
     }
-} 
 
-function formatTime (points) {
-  if (!points) {
-      return;
-  }
-  hours = points / 1800;
-  return parseInt(hours/24) + 'd ' + parseInt(hours%24) + 'h ' + parseInt(((hours%24) - parseInt(hours%24))*60) + 'm';
-}
+    function formatTime (points) {
+      if (!points) {
+          return;
+      }
 
-function drawLevelBox (neededLevel, currentLevel, skillName, rank) {
-    if ((currentLevel) == 0) {
-      row = '<tr class="bg-red">';
-      trainingtime = formatTime(rank * 250 * Math.pow(5.66, (neededLevel-1)));
-    } else if ((neededLevel - currentLevel) > 0) {
-      row = '<tr class="bg-orange">';
-      pointdiff = (rank * 250 * Math.pow(5.66, (neededLevel-1))) - (rank * 250 * Math.pow(5.66, (currentLevel-1))) ;
-      trainingtime = formatTime(pointdiff);
-    } else {
-      row = '<tr>';
-      trainingtime = '';
+      hours = points / 1800;
+      return parseInt(hours/24) + 'd ' + parseInt(hours%24) + 'h ' + parseInt(((hours%24) - parseInt(hours%24))*60) + 'm';
     }
-     
-    graph = row + '<td>'+skillName+' <small>(x'+rank+')</small></td>';
-    graph = graph + '<td style="width: 11em"><div style="background-color: transparent; width: 5.5em; text-align: center; height: 1.35em; letter-spacing: 2.25px;" class="pull-right">';
 
-    if (currentLevel >= neededLevel) {
-	for (var i = 0; i < neededLevel; i++) {
-	    graph = graph + '<span class="fa fa-square " style="vertical-align: text-top; color: #5ac597;"></span>';
-	}
-	for (var i = neededLevel; i < currentLevel; i++) {
-	    graph = graph + '<span class="fa fa-square text-green" style="vertical-align: text-top"></span>';
-	}
-	for (var i = 0; i < (5 - currentLevel); i++) {
-	    graph = graph + '<span class="fa fa-square-o text-green" style="vertical-align: text-top"></span>';
-	}
-    } else {
-	for (var i = 0; i < currentLevel; i++) {
-	    graph = graph + '<span class="fa fa-square " style="vertical-align: text-top; color: #5ac597;"></span>';
-	}
-	for (var i = 0; i < (neededLevel - currentLevel); i++) {
-	    graph = graph + '<span class="fa fa-square-o text-danger" style="vertical-align: text-top"></span>';
-	}
-	for (var i = 0; i < (5 - neededLevel) ; i++) {
-	    graph = graph + '<span class="fa fa-square-o text-green" style="vertical-align: text-top"></span>';
-	}
+    function drawLevelBox (neededLevel, currentLevel, skillName, rank) {
+        if (currentLevel === 0) {
+          row = '<tr class="bg-red">';
+          trainingtime = formatTime(rank * 250 * Math.pow(5.66, (neededLevel-1)));
+        } else if ((neededLevel - currentLevel) > 0) {
+          row = '<tr class="bg-orange">';
+          pointdiff = (rank * 250 * Math.pow(5.66, (neededLevel-1))) - (rank * 250 * Math.pow(5.66, (currentLevel-1))) ;
+          trainingtime = formatTime(pointdiff);
+        } else {
+          row = '<tr>';
+          trainingtime = '';
+        }
+
+        graph = row + '<td>'+skillName+' <small>(x'+rank+')</small></td>';
+        graph = graph + '<td style="width: 11em"><div style="background-color: transparent; width: 5.5em; text-align: center; height: 1.35em; letter-spacing: 2.25px;" class="pull-right">';
+
+        if (currentLevel >= neededLevel) {
+            for (i = 0; i < neededLevel; i++) {
+                graph = graph + '<span class="fa fa-square " style="vertical-align: text-top; color: #5ac597;"></span>';
+            }
+            for (i = neededLevel; i < currentLevel; i++) {
+                graph = graph + '<span class="fa fa-square text-green" style="vertical-align: text-top"></span>';
+            }
+            for (i = 0; i < (5 - currentLevel); i++) {
+                graph = graph + '<span class="fa fa-square-o text-green" style="vertical-align: text-top"></span>';
+            }
+        } else {
+            for (i = 0; i < currentLevel; i++) {
+                graph = graph + '<span class="fa fa-square " style="vertical-align: text-top; color: #5ac597;"></span>';
+            }
+            for (i = 0; i < (neededLevel - currentLevel); i++) {
+                graph = graph + '<span class="fa fa-square-o text-danger" style="vertical-align: text-top"></span>';
+            }
+            for (i = 0; i < (5 - neededLevel) ; i++) {
+                graph = graph + '<span class="fa fa-square-o text-green" style="vertical-align: text-top"></span>';
+            }
+        }
+
+        graph = graph + '</div><span class="pull-right"><small>' + trainingtime  + '</small> </span></td></tr>';
+
+        return graph;
     }
-    graph = graph + '</div><span class="pull-right"><small>' + trainingtime  + '</small> </span></td></tr>';
-    return graph;
-}
 
-function fillFittingWindow (result) {
-    if (result) {
-	$('#fitting-window').show();
-	$('#middle-header').text(result.shipname + ', ' + result.fitname);
-        $('#showeft').val(result.eft);
-        $('#eftexport').show();
+    function fillFittingWindow (result) {
+        if (result) {
+            $('#fitting-window').show();
+            $('#middle-header').text(result.shipname + ', ' + result.fitname);
+            $('#showeft').val(result.eft);
+            $('#eftexport').show();
 
-	for (var slot in result) {
+            for (slot in result) {
 
-	    if (slot.indexOf('HiSlot') >= 0)
-		$('#highSlots').find('tbody').append(
-		    "<tr><td><img src='https://image.eveonline.com/Type/" + result[slot].id + "_32.png' height='24' /> " + result[slot].name + "</td></tr>");
+                if (slot.indexOf('HiSlot') >= 0)
+                    $('#highSlots').find('tbody').append(
+                        "<tr><td><img src='https://image.eveonline.com/Type/" + result[slot].id + "_32.png' height='24' /> " + result[slot].name + "</td></tr>");
 
-	    if (slot.indexOf('MedSlot') >= 0)
-		$('#midSlots').find('tbody').append(
-		    "<tr><td><img src='https://image.eveonline.com/Type/" + result[slot].id + "_32.png' height='24' /> " + result[slot].name + "</td></tr>");
+                if (slot.indexOf('MedSlot') >= 0)
+                    $('#midSlots').find('tbody').append(
+                        "<tr><td><img src='https://image.eveonline.com/Type/" + result[slot].id + "_32.png' height='24' /> " + result[slot].name + "</td></tr>");
 
-	    if (slot.indexOf('LoSlot') >= 0)
-		$('#lowSlots').find('tbody').append(
-		    "<tr><td><img src='https://image.eveonline.com/Type/" + result[slot].id + "_32.png' height='24' /> " + result[slot].name + "</td></tr>");
+                if (slot.indexOf('LoSlot') >= 0)
+                    $('#lowSlots').find('tbody').append(
+                        "<tr><td><img src='https://image.eveonline.com/Type/" + result[slot].id + "_32.png' height='24' /> " + result[slot].name + "</td></tr>");
 
-	    if (slot.indexOf('RigSlot') >= 0)
-		$('#rigs').find('tbody').append(
-		    "<tr><td><img src='https://image.eveonline.com/Type/" + result[slot].id + "_32.png' height='24' /> " + result[slot].name + "</td></tr>");
+                if (slot.indexOf('RigSlot') >= 0)
+                    $('#rigs').find('tbody').append(
+                        "<tr><td><img src='https://image.eveonline.com/Type/" + result[slot].id + "_32.png' height='24' /> " + result[slot].name + "</td></tr>");
 
-	    if (slot.indexOf('SubSlot') >= 0)
-		$('#subSlots').find('tbody').append(
-		    "<tr><td><img src='https://image.eveonline.com/Type/" + result[slot].id + "_32.png' height='24' /> " + result[slot].name + "</td></tr>");
+                if (slot.indexOf('SubSlot') >= 0)
+                    $('#subSlots').find('tbody').append(
+                        "<tr><td><img src='https://image.eveonline.com/Type/" + result[slot].id + "_32.png' height='24' /> " + result[slot].name + "</td></tr>");
 
-	    if (slot.indexOf('dronebay') >= 0) {
-		for (var item in result[slot])
-		    $('#drones').find('tbody').append(
-			"<tr><td><img src='https://image.eveonline.com/Type/" + item + "_32.png' height='24' /> " + result[slot][item].name + "</td><td>" + result[slot][item].qty + "</td></tr>");
-	    }
-	}
+                if (slot.indexOf('dronebay') >= 0) {
+                    for (item in result[slot])
+                        $('#drones').find('tbody').append(
+                        "<tr><td><img src='https://image.eveonline.com/Type/" + item + "_32.png' height='24' /> " + result[slot][item].name + "</td><td>" + result[slot][item].qty + "</td></tr>");
+                    }
+            }
+        }
     }
-}
-
 </script>
 @endpush
 
