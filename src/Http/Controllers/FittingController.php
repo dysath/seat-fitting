@@ -92,30 +92,6 @@ class FittingController extends Controller
 
     private $requiredSkills = [];
 
-    public function getFittingList()
-    {
-       $fitnames = [];
-   
-        $fittings = Fitting::all();
-
-        if (count($fittings) <= 0) {
-            return $fitnames;
-        }
-
-        foreach ($fittings as $fit) {
-            $ship = InvType::where('typeName', $fit->shiptype)->first();
-
-            array_push($fitnames, [
-                'id' => $fit->id,
-                'shiptype' => $fit->shiptype,
-                'fitname' => $fit->fitname,
-                'typeID' => $ship->typeID,
-            ]);
-        }
-
-        return $fitnames;
-    }
-
     public function getDoctrineEdit($doctrine_id) 
     {
         $selected = [];
@@ -260,6 +236,61 @@ class FittingController extends Controller
         return json_encode($skillsToons);
     }
 
+    protected function getFittings()
+    {
+        $alliance_corps = [];
+
+        if (auth()->user()->hasSuperUser()) {
+            $fittings = Fitting::all();
+        } else {
+            $character = CharacterInfo::find(auth()->user()->id);
+            $corp_id = $character->corporation_id;
+            $corporation = CorporationInfo::find($corp_id);
+            if ($corporation == null) {
+                return [];
+            }
+            $corps = CorporationInfo::where('alliance_id', $corporation->alliance_id)->select('corporation_id')->get()->unique('corporation_id')->values()->toArray();
+
+            foreach ($corps as $corp) {
+                array_push($alliance_corps, $corp['corporation_id']);
+            }
+
+            $alliance_id = $corporation->alliance_id;
+            $fittings = Fitting::where('corporation_id', $corp_id)->
+                orWhere(function ($query) use ($alliance_corps) {
+                    $query->where('allow_alliance', true)
+                          ->whereIn('corporation_id', $alliance_corps);
+                    })
+                ->orWhere('allow_public', true)->get();
+
+        }
+        return $fittings;
+    }
+
+    public function getFittingList()
+    {
+        $fitnames = [];
+        $alliance_corps = [];
+
+        $fittings = $this->getFittings();
+
+        if (count($fittings) <= 0)
+            return $fitnames;
+
+        foreach ($fittings as $fit) {
+            $ship = InvType::where('typeName', $fit->shiptype)->first();
+
+            array_push($fitnames, [
+                'id' => $fit->id,
+                'shiptype' => $fit->shiptype,
+                'fitname' => $fit->fitname,
+                'typeID' => $ship->typeID
+            ]);
+        }
+
+        return $fitnames;
+    }
+
     public function getEftFittingById($id)
     {
         $fitting = Fitting::find($id);
@@ -276,9 +307,21 @@ class FittingController extends Controller
 
     public function getFittingView()
     {
+        $corps = [];
         $fitlist = $this->getFittingList();
 
-        return view('fitting::fitting', compact('fitlist'));
+        if (auth()->user()->hasSuperUser()) {
+            $corpnames = CorporationInfo::all();
+        } else {
+            $corpids = CharacterInfo::whereIn('character_id', auth()->user()->associatedCharacterIds())->select('corporation_id')->get()->toArray();
+            $corpnames = CorporationInfo::whereIn('corporation_id', $corpids)->get();
+        }
+
+        foreach ($corpnames as $corp) {
+          $corps[$corp->corporation_id] = $corp->name;
+        }
+
+        return view('fitting::fitting', compact('fitlist', 'corps'));
     }
 
     public function getDoctrineView()
@@ -840,23 +883,22 @@ class FittingController extends Controller
                     }
                 }
 
+                if (!isset($data['totals'][$fit['name']]['ship'])) {
+                     $data['totals'][$fit['name']]['ship'] = 0;
+                }
+                if (!isset($data['totals'][$fit['name']]['fit'])) {
+                     $data['totals'][$fit['name']]['fit'] = 0;
+                }
+
                 $data['chars'][$char['name']][$fit['name']]['ship'] = false;
                 if ($canflyship) {
                     $data['chars'][$char['name']][$fit['name']]['ship'] = true;
-                    if (!isset($data['totals'][$fit['name']]['ship'])) {
-                         $data['totals'][$fit['name']]['ship'] = 0;
-                    }
                     $data['totals'][$fit['name']]['ship']++;
                 }
 
                 $data['chars'][$char['name']][$fit['name']]['fit'] = false;
                 if ($canflyfit) {
                     $data['chars'][$char['name']][$fit['name']]['fit'] = true;
-
-                    if (!isset($data['totals'][$fit['name']]['fit'])) {
-                         $data['totals'][$fit['name']]['fit'] = 0;
-                    }
-
                     $data['totals'][$fit['name']]['fit']++;
                 }
             }

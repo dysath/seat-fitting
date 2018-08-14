@@ -113,6 +113,7 @@
             header = "";
 
             for (fit in result.fittings) {
+
                 header = header + "<th style='text-align: center'>" + result.fittings[fit] + "</th>";
             }
 
@@ -135,7 +136,8 @@
                 if (total !== "chars") {
                     body = body + "<td style='text-align: center; width: 10em;'>" + result.totals[total].ship + "  /  " + result.totals[total].fit + "<br/>";
                     body = body + Math.round((result.totals[total].ship / result.totals['chars'])*100) + "%  /  " + Math.round((result.totals[total].fit / result.totals['chars'])*100) + "%</td>";
-                }
+                } 
+              
             }
 
             totals.find("tbody").append(body);
