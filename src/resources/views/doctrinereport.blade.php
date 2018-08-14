@@ -43,25 +43,16 @@
     </div>
 </div>
 
-<div class="box box-primary box-solid" id="totalsbox">
-    <div class="box-body">
-        <table id="totals" class="table table-condensed">
-        <thead>
-        </thead>
-        <tbody>
-        </tbody>
-        </table>
-    </div>
-</div>
-
 <div class="box box-primary box-solid" id="reportbox">
     <div class="box-body">
-        <table id="report" class="table table-condensed table-striped no-footer">
-        <thead>
-        </thead>
-        <tbody>
-        </tbody>
-        </table>
+        <div class="table-responsive" style="overflow: auto">
+            <table id="report" class="table table-condensed table-striped no-footer">
+            <thead>
+            </thead>
+            <tbody>
+            </tbody>
+            </table>
+        </div>
     </div>
 </div>
 @endsection
@@ -71,10 +62,8 @@
     var button = $('#runreport');
     var table;
     var report = $('#report');
-    var totals = $('#totals');
 
     $( document ).ready(function() {
-        $('#totalsbox').hide();
         $('#reportbox').hide();
     });
 
@@ -87,7 +76,6 @@
         //
         // hide pane while loading data
         //
-        $('#totalsbox').hide();
         $('#reportbox').hide();
 
         //
@@ -99,7 +87,7 @@
             report.find("thead, tbody").empty();
         }
 
-        totals.find("thead, tbody").empty();
+        report.find("thead, tbody").empty();
 
         $.ajax({
             headers: function () {
@@ -120,7 +108,6 @@
             header = header + "</tr>";
 
             report.find("thead").append("<tr><th>Character</th>" + header);
-            totals.find("thead").append("<tr><th></th>" + header);
 
             body = "<tr><td><label>HULL  /  FIT Totals</label></td>";
 
@@ -140,8 +127,8 @@
               
             }
 
-            totals.find("tbody").append(body);
-
+            report.find("tbody").prepend(body);
+           
             for (var char in result.chars) {
                 body = "<tr><td>"+char+"</td>";
 
@@ -164,15 +151,9 @@
                 report.find("tbody").append(body);
             }
 
-            table = report.DataTable({
-                "order": [[ 0, "asc" ]],
-                "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]]
-            });
-
             //
             // show report content
             //
-            $('#totalsbox').show();
             $('#reportbox').show();
 
             button.find('span').removeClass('fa-spin');
