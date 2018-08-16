@@ -238,33 +238,7 @@ class FittingController extends Controller
 
     protected function getFittings()
     {
-        $alliance_corps = [];
-
-        if (auth()->user()->hasSuperUser()) {
-            $fittings = Fitting::all();
-        } else {
-            $character = CharacterInfo::find(auth()->user()->id);
-            $corp_id = $character->corporation_id;
-            $corporation = CorporationInfo::find($corp_id);
-            if ($corporation == null) {
-                return [];
-            }
-            $corps = CorporationInfo::where('alliance_id', $corporation->alliance_id)->select('corporation_id')->get()->unique('corporation_id')->values()->toArray();
-
-            foreach ($corps as $corp) {
-                array_push($alliance_corps, $corp['corporation_id']);
-            }
-
-            $alliance_id = $corporation->alliance_id;
-            $fittings = Fitting::where('corporation_id', $corp_id)->
-                orWhere(function ($query) use ($alliance_corps) {
-                    $query->where('allow_alliance', true)
-                          ->whereIn('corporation_id', $alliance_corps);
-                    })
-                ->orWhere('allow_public', true)->get();
-
-        }
-        return $fittings;
+        return Fitting::all();
     }
 
     public function getFittingList()
