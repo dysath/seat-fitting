@@ -2,8 +2,6 @@
 
 namespace Denngarr\Seat\Fitting\Http\Controllers;
 
-use Denngarr\Seat\Fitting\Models\Fitting;
-use Denngarr\Seat\Fitting\Models\Doctrine;
 use Seat\Services\Repositories\Character\Info;
 use Seat\Services\Repositories\Character\Skills;
 use Seat\Services\Repositories\Configuration\UserRespository;
@@ -11,84 +9,18 @@ use Seat\Web\Http\Controllers\Controller;
 use Seat\Web\Models\Acl\Role;
 use Seat\Eveapi\Models\Character\CharacterInfo;
 use Seat\Eveapi\Models\Corporation\CorporationInfo;
-use Denngarr\Seat\Fitting\Validation\FittingValidation;
-use Denngarr\Seat\Fitting\Validation\DoctrineValidation;
+use Denngarr\Seat\Fitting\Helpers\CalculateConstants;
+use Denngarr\Seat\Fitting\Helpers\CalculateEft;
+use Denngarr\Seat\Fitting\Models\Fitting;
+use Denngarr\Seat\Fitting\Models\Doctrine;
 use Denngarr\Seat\Fitting\Models\Sde\InvType;
 use Denngarr\Seat\Fitting\Models\Sde\DgmTypeAttributes;
+use Denngarr\Seat\Fitting\Validation\FittingValidation;
+use Denngarr\Seat\Fitting\Validation\DoctrineValidation;
 
-class FittingController extends Controller
+class FittingController extends Controller implements CalculateConstants
 {
-    use UserRespository, Skills, Info;
-
-    // don't touch this, or you will lose your hands
-    // see dgmAttributeTypes to know what they are
-    const REQ_SKILLS_ATTRIBUTES = [
-        182, 183, 184, 1285, 1289, 1290,
-    ];
-
-    const REQ_SKILLS_LEVELS     = [
-        277, 278, 279, 1286, 1287, 1288,
-    ];
-
-    const REQ_SKILLS_ATTR_LEVELS = [
-        182 => 277,
-        183 => 278,
-        184 => 279,
-        1285 => 1286,
-        1289 => 1287,
-        1290 => 1288,
-    ];
-
-    const DG_PGOUTPUT  = 11;
-    const DG_PGLOAD    = 15;
-    const DG_CPUOUTPUT = 48;
-    const DG_CPULOAD   = 49;
-
-    const RAISE_ALREADY_FULLFILLED = 0;
-    const RAISE_SKILL_RAISED       = 1;
-    const RAISE_CANNOT_RAISE       = 2;
-
-    const CPU_SKILL_ORDER = [
-        // CPU Management
-        // Weapon Upgrades
-        [3426 => 1],
-        [3318 => 1],
-        [3426 => 2],
-        [3318 => 2],
-        [3426 => 3],
-        [3318 => 3],
-        [3426 => 4],
-        [3426 => 5],
-        [3318 => 4],
-        [3318 => 5],
-    ];
-
-    const PG_SKILL_ORDER = [
-        // Power Grid Management
-        // Shield Upgrades
-        // Advanced Weapon Upgrades
-        [3413  => 1],
-        [3413  => 2],
-        [3413  => 3],
-        [3413  => 4],
-        [3413  => 5],
-        [3425  => 1],
-        [11207 => 1],
-        [3425  => 2],
-        [11207 => 2],
-        [3425  => 3],
-        [11207 => 3],
-        [3425  => 4],
-        [11207 => 4],
-        [3425  => 5],
-        [11207 => 5],
-    ];
-
-    private $ctx;
-
-    private $cpu_raise_index = 0;
-
-    private $pg_raise_index = 0;
+    use CalculateEft, UserRespository, Skills, Info;
 
     private $requiredSkills = [];
 
@@ -372,114 +304,55 @@ class FittingController extends Controller
 
         }
 
-        // get shipname of first line by removing brackets
-        
-        $index = 0;
-
-        foreach ($lowslot as $slot) {
-            $module = explode(",", $slot);
-
-            if (! preg_match("/\[Empty .+ slot\]/", $module[0])) {
-                $item = InvType::where('typeName', $module[0])->first();
-
-                $jsfit['LoSlot' . $index] = [
-                    'id'  => $item->typeID,
-                    'name' => $module[0],
-                ];
-
-                $index++;
-            }
-        }
-        
-        $index = 0;
-
-        foreach ($midslot as $slot) {
-            $module = explode(",", $slot);
-
-            if (! preg_match("/\[Empty .+ slot\]/", $module[0])) {
-                $item = InvType::where('typeName', $module[0])->first();
-
-                $jsfit['MedSlot' . $index] = [
-                    'id'   => $item->typeID,
-                    'name' => $module[0],
-                ];
-
-                $index++;
-            }
-        }
-
-        $index = 0;
-
-        foreach ($highslot as $slot) {
-            $module = explode(",", $slot);
-
-            if (! preg_match("/\[Empty .+ slot\]/", $module[0])) {
-                $item = InvType::where('typeName', $module[0])->first();
-
-                $jsfit['HiSlot' . $index] = [
-                    'id'   => $item->typeID,
-                    'name' => $module[0],
-                ];
-
-                $index++;
-            }
-        }
-
-        $index = 0;
+        $this->loadSlot($jsfit, "LoSlot", $lowslot);
+        $this->loadSlot($jsfit, "MedSlot", $midslot);
+        $this->loadSlot($jsfit, "HiSlot", $highslot);
 
         if (isset($subslot)) {
-            foreach ($subslot as $slot) {
-                $module = explode(",", $slot);
-
-                if (! preg_match("/\[Empty .+ slot\]/", $module[0])) {
-                    $item = InvType::where('typeName', $module[0])->first();
-
-                    $jsfit['SubSlot' . $index] = [
-                        'id'   => $item->typeID,
-                        'name' => $module[0],
-                    ];
-
-                    $index++;
-                }
-            }
+            $this->loadSlot($jsfit, "SubSlot", $subslot);
         }
         
+        $this->loadSlot($jsfit, "RigSlot", $rigs);
+        
+        if (isset($drones)) {
+            foreach ($drones as $slot) {
+                list($drone, $qty) = explode(" x", $slot);
+                $item = InvType::where('typeName', $drone)->first();
+
+                $jsfit['dronebay'][$item->typeID] = [
+                    'name' => $drone,
+                    'qty'  => $qty,
+                ];
+            } 
+        }
+        return $jsfit;
+    }
+
+    private function loadSlot(&$jsfit, $slotname, $slots) 
+    {
         $index = 0;
 
-        foreach ($rigs as $slot) {
+        foreach ($slots as $slot) {
+            $module = explode(",", $slot);
 
-            if (! preg_match("/\[Empty .+ slot\]/", $slot)) {
-                $item = InvType::where('typeName', $slot)->first();
-            
+            if (! preg_match("/\[Empty .+ slot\]/", $module[0])) {
+                $item = InvType::where('typeName', $module[0])->first();
+
                 if (empty($item)) {
                     continue;
                 }
 
-                $jsfit['RigSlot'.$index] = [
+                $jsfit[$slotname . $index] = [
                     'id'   => $item->typeID,
-                    'name' => $slot,
+                    'name' => $module[0],
                 ];
 
-                 $index++;
+                $index++;
             }
         }
-        
-        if (! isset($drones)) {
-            return $jsfit;
-        }
-
-        foreach ($drones as $slot) {
-            list($drone, $qty) = explode(" x", $slot);
-            $item = InvType::where('typeName', $drone)->first();
-
-            $jsfit['dronebay'][$item->typeID] = [
-                'name' => $drone,
-                'qty'  => $qty,
-            ];
-        }
-
-        return $jsfit;
+        return;
     }
+
 
     public function postSkills(FittingValidation $request)
     {
@@ -525,218 +398,6 @@ class FittingController extends Controller
         }
 
         return response()->json($skillsToons);
-    }
-
-    public function calculate($fitting)
-    {
-
-        $items = $this->parseEftFitting($fitting);
-        $item_ids = $this->getUniqueTypeIDs($items['all_item_types']);
-        $this->getReqSkillsByTypeIDs($item_ids);
-        $this->modifyRequiredSkills($items['fit_items']);
-
-        return $this->getSkillNames($this->requiredSkills);
-    }
-
-    private function modifyRequiredSkills($fitting)
-    {
-        // skip this, if dogma extension isn't loaded
-        if (!extension_loaded('dogma')) {
-            return;
-        }
-
-        dogma_init_context($this->ctx);
-        dogma_set_default_skill_level($this->ctx, 0);
-
-        $fitting = $this->convertToTypeIDs($fitting);
-
-        // add ship
-        dogma_set_ship($this->ctx, array_shift($fitting));
-
-        // add skills
-        foreach ($this->requiredSkills as $skill => $level) {
-            dogma_set_skill_level($this->ctx, $skill, $level);
-        }
-
-        // add modules
-        foreach ($fitting as $item) {
-            dogma_add_module_s($this->ctx, $item, $key, DOGMA_STATE_Active);
-        }
-
-        // raise CPU skills
-        $raise = null;
-        while ($this->getAttribValue(self::DG_CPUOUTPUT) < $this->getAttribValue(self::DG_CPULOAD) && $raise !== self::RAISE_CANNOT_RAISE) {
-            $raise = $this->raiseSkill('cpu');
-        }
-
-        // raise Powergrid skills
-        $raise = null;
-        while ($this->getAttribValue(self::DG_PGOUTPUT) < $this->getAttribValue(self::DG_PGLOAD) && $raise !== self::RAISE_CANNOT_RAISE) {
-            $raise = $this->raiseSkill('powergrid');
-        }
-    }
-
-    private function getAttribValue($attrib)
-    {
-        dogma_get_ship_attribute($this->ctx, $attrib, $ret);
-
-        return $ret;
-    }
-
-    private function raiseSkill($type)
-    {
-        switch ($type) {
-            case 'cpu':
-                $index =& $this->cpu_raise_index;
-                $skillsOrder = self::CPU_SKILL_ORDER;
-                break;
-            case 'powergrid':
-                $index =& $this->pg_raise_index;
-                $skillsOrder = self::PG_SKILL_ORDER;
-                break;
-        }
-
-        if (!isset($skillsOrder[$index])) {
-            return self::RAISE_CANNOT_RAISE;
-        }
-
-        $skill = $skillsOrder[$index];
-        $skillId = key($skill);
-        $level = $skill[$skillId];
-
-        $index++;
-
-        if (! isset($this->requiredSkills[$skillId]) || $this->requiredSkills[$skillId] < $level) {
-            dogma_set_skill_level($this->ctx, $skillId, $level);
-            $this->requiredSkills[$skillId] = $level;
-
-            return self::RAISE_SKILL_RAISED;
-        }
-
-        return self::RAISE_ALREADY_FULLFILLED;
-    }
-
-    private function getReqSkillsByTypeIDs($typeIDs)
-    {
-        $attributeids = array_merge(array_keys(self::REQ_SKILLS_ATTR_LEVELS), array_values(self::REQ_SKILLS_ATTR_LEVELS));
-
-        foreach ($typeIDs as $type) {
-            $res = DgmTypeAttributes::where('typeid', $type['typeID'])->wherein('attributeID', $attributeids)->get();
-
-            if (count($res) == 0) {
-                continue;
-            }
-
-            $skillsToAdd = $this->prepareRequiredSkills($res);
-            $this->buildMinRequiredSkills($skillsToAdd);
-            $this->findSubRequiredSkills($skillsToAdd);
-        }
-    }
-
-    private function findSubRequiredSkills($skills)
-    {
-        $toFind = [];
-
-        foreach ($skills as $skill => $level) {
-            $toFind[] = ['typeID' => $skill];
-        }
-
-        $this->getReqSkillsByTypeIDs($toFind);
-    }
-
-    private function buildMinRequiredSkills($toAdd)
-    {
-        foreach ($toAdd as $skill => $level) {
-            if (! isset($this->requiredSkills[$skill]) || $this->requiredSkills[$skill] < $level) {
-                $this->requiredSkills[$skill] = $level;
-            }
-        }
-    }
-
-    private function prepareRequiredSkills($attributes)
-    {
-        $skills = [];
-        $keys = [];
-
-        // build an array of attributes
-        foreach ($attributes as $attribute) {
-            $attribValue = $attribute['valueInt'] !== null ? $attribute['valueInt'] : $attribute['valueFloat'];
-            $keys[$attribute['attributeID']] = $attribValue;
-        }
-
-        // iterate over all attributes and build the skill array
-        foreach (self::REQ_SKILLS_ATTR_LEVELS as $k => $v) {
-            if (isset($keys[$k])) {
-                $skills[$keys[$k]] = $keys[$v];
-            }
-        }
-
-        return $skills;
-    }
-
-    private function parseEftFitting($fitting)
-    {
-        $fitting = $this->sanatizeFittingBlock($fitting);
-        $fitsplit = explode("\n", $fitting);
-
-        // get shipname of first line by removing brackets
-        list($shipname, $fitname) = explode(", ", substr(array_shift($fitsplit), 1, -1));
-
-        $fit_all_items = [];
-        $fit_calc_items = [];
-
-        // first element is always the ship type
-        $fit_all_items[] = $fit_calc_items[] = $shipname;
-
-        foreach ($fitsplit as $key => $line) {
-            // split line to get charge
-            $linesplit = explode(",", $line);
-
-            if (isset($linesplit[1])) {
-                $fit_all_items[] = $linesplit[1];
-            }
-
-            // don't add drones to fitting
-            if (preg_match("/ x\d+/", $linesplit[0])) {
-                $fit_all_items[] = $this->sanatizeTypeName($linesplit[0]);
-            } else {
-                $fit_all_items[] = $fit_calc_items[] = $this->sanatizeTypeName($linesplit[0]);
-            }
-        }
-
-        return [
-            'all_item_types' => array_unique($fit_all_items),
-            'fit_items' => $fit_calc_items,
-        ];
-    }
-
-    private function getUniqueTypeIDs($items)
-    {
-        return InvType::wherein('typeName', $items)->get();
-    }
-
-    private function convertToTypeIDs($items)
-    {
-        foreach ($items as $key => $item) {
-            $items[$key] = InvType::where('typeName', $item)->first()->id;
-        }
-
-        return $items;
-    }
-
-    private function sanatizeFittingBlock($fitting)
-    {
-        // remove useless empty lines and whatnot
-        $fitting = preg_replace("/\[Empty .+ slot\]/", "", $fitting);
-
-        return ltrim(rtrim(preg_replace("/^[ \t]*[\r\n]+/m", "", $fitting)));
-    }
-
-    private function sanatizeTypeName($item)
-    {
-        // remove amount for charges
-        // sample: Scourge Rage Heavy Assault Missile x66
-        return ltrim(rtrim(preg_replace("/ x\d+/", "", $item)));
     }
 
     private function getSkillNames($types)
