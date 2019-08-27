@@ -12,13 +12,25 @@
         <div class="row">
             <div class="col-md-6 col-lg-3">
                 <div class="form-group">
+                    <label for="alliances">Alliance:</label>
+                    <select id="alliances" class="form-control">
+                        <option value="0">---</option>
+                        @foreach ($alliances as $alliance)
+                        <option value="{{ $alliance->alliance_id }}">{{ $alliance->name }}[{{ $alliance->ticker }}]</option>
+                        @endforeach
+                    </select>
+                    <p class="help-block"><b>Note:</b>  Report results are (can fly ship / can fly fitted ship)</p>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="form-group">
                     <label for="corporations">Corporation:</label>
                     <select id="corporations" class="form-control">
+                        <option value="0">---</option>
                         @foreach ($corps as $corp)
                         <option value="{{ $corp->corporation_id }}">{{ $corp->name }}</option>
                         @endforeach
                     </select>
-                    <p class="help-block"><b>Note:</b>  Report results are (can fly ship / can fly fitted ship)</p>
                 </div>
             </div>
             <div class="col-md-6 col-lg-3">
@@ -68,6 +80,7 @@
     });
 
     button.on('click', function () {
+        allianceid = $('#alliances').find(":selected").val();
         corpid = $('#corporations').find(":selected").val();
         doctrineid = $('#doctrines').find(":selected").val();
 
@@ -92,7 +105,7 @@
         $.ajax({
             headers: function () {
             },
-            url: "/fitting/runReport/" + corpid + "/" + doctrineid,
+            url: "/fitting/runReport/" + allianceid + "/" + corpid + "/" + doctrineid,
             type: "GET",
             datatype: 'json',
             timeout: 10000

@@ -7,6 +7,8 @@ use Seat\Services\Repositories\Character\Skills;
 use Seat\Services\Repositories\Configuration\UserRespository;
 use Seat\Web\Http\Controllers\Controller;
 use Seat\Web\Models\Acl\Role;
+use Seat\Eveapi\Models\Alliances\Alliance;
+use Seat\Eveapi\Models\Alliances\AllianceMember;
 use Seat\Eveapi\Models\Character\CharacterInfo;
 use Seat\Eveapi\Models\Corporation\CorporationInfo;
 use Denngarr\Seat\Fitting\Helpers\CalculateConstants;
@@ -446,13 +448,32 @@ class FittingController extends Controller implements CalculateConstants
     {
         $doctrines = Doctrine::all();
         $corps = CorporationInfo::all();
+        $alliances = array();
 
-        return view('fitting::doctrinereport', compact('doctrines', 'corps'));
+        foreach ($corps as $corp) {
+          if (!is_null($corp->alliance_id)) {
+            array_push($alliances, Alliance::find($corp->alliance_id)); 
+          }
+        }
+
+        return view('fitting::doctrinereport', compact('doctrines', 'corps', 'alliances'));
     }
 
-    public function runReport($corp_id, $doctrine_id)
+    public function runReport($alliance_id, $corp_id, $doctrine_id)
     {
-        $characters = CharacterInfo::where('corporation_id', $corp_id)->get();
+        $characters = collect();
+ 
+        if ($alliance_id !== '0') {
+            $alliance = Alliance::find($alliance_id);
+            $corps = AllianceMember::where('alliance_id', $alliance_id)->get();
+            foreach ($corps as $corp) {
+                $chars = CharacterInfo::where('corporation_id', $corp->corporation_id)->get();
+                $characters = $characters->concat($chars);
+            }
+        } else {
+            $characters = CharacterInfo::where('corporation_id', $corp_id)->get();
+        }
+
         $doctrine = Doctrine::where('id', $doctrine_id)->first();
         $fittings = $doctrine->fittings;
         $charData = [];
