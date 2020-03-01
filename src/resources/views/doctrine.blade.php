@@ -4,18 +4,18 @@
 @section('page_header', trans('fitting::fitting.list'))
 
 @section('left')
-    <div class="box box-primary box-solid">
-        <div class="box-header">
-           <h3 class="box-title">Doctrines</h3>
+    <div class="card card-primary card-solid">
+        <div class="card-header">
+           <h3 class="card-title">Doctrines</h3>
            @if (auth()->user()->has('fitting.create', false)) 
-           <div class="box-tools pull-right">
-               <button type="button" class="btn btn-xs btn-box-tool" id="newDoctrine" data-toggle="modal" data-toggle="tooltip" data-target="#addDoctrine" data-placement="top" title="Create a new doctrine">
+           <div class="card-tools pull-right">
+               <button type="button" class="btn btn-xs btn-tool" id="newDoctrine" data-toggle="modal" data-toggle="tooltip" data-target="#addDoctrine" data-placement="top" title="Create a new doctrine">
                    <span class="fa fa-plus-square"></span>
                </button>
            </div>
            @endif
         </div>
-        <div class="box-body">
+        <div class="card-body">
         <div class="input-group">
           <select id="doctrineSpinner" class="form-control">
               <option value="0">Choose Doctrine....</option>
@@ -26,7 +26,7 @@
           <div class="input-group-btn">
               @if ((auth()->user()->has('fitting.create', false)) && (!empty($doctrine_list)))
               <button type="button" id="editDoctrine" class="btn btn-warning" disabled="disabled" data-id="" data-toggle="modal" data-target="#addDoctrine" data-toggle="tooltip" data-placement="top" title="Edit Doctrine" inactive>
-                  <span class="fa fa-pencil text-white"></span>
+                  <span class="fas fa-edit text-white"></span>
               </button>
               <button type="button" id="deleteDoctrine" class="btn btn-danger" disabled="disabled" data-id="" data-toggle="tooltip" data-placement="top" title="Delete Doctrine">
                   <span class="fa fa-trash text-white"></span>
@@ -49,11 +49,11 @@
         </div>
     </div>
 
-    <div class="box box-primary box-solid" id='eftexport'>
-        <div class="box-header">
-           <h3 class="box-title">EFT Fitting</h3>
+    <div class="card card-primary card-solid" id='eftexport'>
+        <div class="card-header">
+           <h3 class="card-title">EFT Fitting</h3>
         </div>
-        <div class="box-body">
+        <div class="card-body">
             <textarea name="showeft" id="showeft" rows="15" style="width: 100%" onclick="this.focus();this.select()" readonly="readonly"></textarea>
         </div>
     </div>
@@ -104,10 +104,10 @@
 
 @endsection
 @section('center')
-    <div class="box box-primary box-solid" id="fitting-box">
-        <div class="box-header"><h3 class="box-title" id='middle-header'></h3></div>
+    <div class="card card-primary card-solid" id="fitting-box">
+        <div class="card-header"><h3 class="card-title" id='middle-header'></h3></div>
         <input type="hidden" id="fittingId" value=""\>
-        <div class="box-body">
+        <div class="card-body">
             <div id="fitting-window">
                  <table class="table table-condensed table-striped" id="lowSlots">
                      <thead>
@@ -163,9 +163,9 @@
     </div>
 @endsection
 @section('right')
-    <div class="box box-primary box-solid" id="skills-box">
-        <div class="box-header form-group"><h3 class="box-title" id="skill-title">Required Skills</h3></div>
-        <div class="box-body">
+    <div class="card card-primary card-solid" id="skills-box">
+        <div class="card-header form-group"><h3 class="card-title" id="skill-title">Required Skills</h3></div>
+        <div class="card-body">
             <div id="skills-window">
             <table class="table table-condensed">
             <tr>

@@ -5,25 +5,25 @@ return [
         'name' => 'Doctrines & Fittings',
         'permission' => 'fitting.doctrineview',
         'route_segment' => 'fitting',
-        'icon' => 'fa-rocket',
+        'icon' => 'fas fa-rocket',
         'entries'       => [
             'fitting' => [
                 'name' => 'Fittings',
-                'icon' => 'fa-rocket',
+                'icon' => 'fas fa-rocket',
                 'route_segment' => 'fitting',
                 'route' => 'fitting.view',
                 'permission' => 'fitting.view'
             ],
             'doctrine' => [
                 'name' => 'Doctrine',
-                'icon' => 'fa-list',
+                'icon' => 'fas fa-list',
                 'route_segment' => 'fitting',
                 'route' => 'fitting.doctrineview',
                 'permission' => 'fitting.doctrineview'
             ],
             'doctrinereport' => [
                 'name' => 'Doctrine Report',
-                'icon' => 'fa-pie-chart',
+                'icon' => 'fas fa-chart-pie',
                 'route_segment' => 'fitting',
                 'route' => 'fitting.doctrinereport',
                 'permission' => 'fitting.reportview'

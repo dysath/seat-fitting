@@ -7,6 +7,10 @@
         {
             "name": "Denngarr B'tarn",
             "email": "ed.stafford@gmail.com"
+        },
+        {
+            "name": "Crypta Electrica",
+            "email": "crypta@crypta.tech"
         }
     ],
     "minimum-stability": "stable",
@@ -23,8 +27,8 @@
         }
     },
     "require": {
-        "eveseat/services": "^3.0",
-        "eveseat/eveapi": "^3.0",
-        "eveseat/web": "^3.0"
+        "eveseat/services": "^4.0",
+        "eveseat/eveapi": "^4.0",
+        "eveseat/web": "^4.0"
     }
 }

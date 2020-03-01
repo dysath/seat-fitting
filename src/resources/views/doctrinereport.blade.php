@@ -4,11 +4,11 @@
 @section('page_header', trans('fitting::fitting.list'))
 
 @section('full')
-<div class="box box-primary box-solid">
-    <div class="box-header">
-        <h3 class="box-title">Doctrine Report</h3>
+<div class="card card-primary card-solid">
+    <div class="card-header">
+        <h3 class="card-title">Doctrine Report</h3>
     </div>
-    <div class="box-body">
+    <div class="card-body">
         <div class="row">
             <div class="col-md-6 col-lg-3">
                 <div class="form-group">
@@ -55,8 +55,8 @@
     </div>
 </div>
 
-<div class="box box-primary box-solid" id="reportbox">
-    <div class="box-body">
+<div class="card card-primary card-solid" id="reportbox">
+    <div class="card-body">
         <div class="table-responsive" style="overflow: auto">
             <table id="report" class="table table-condensed table-striped no-footer">
             <thead>
