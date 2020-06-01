@@ -8,6 +8,7 @@ use Seat\Web\Models\Acl\Role;
 use Seat\Eveapi\Models\Alliances\Alliance;
 use Seat\Eveapi\Models\Alliances\AllianceMember;
 use Seat\Eveapi\Models\Character\CharacterInfo;
+use Seat\Eveapi\Models\Character\CharacterAffiliation;
 use Seat\Eveapi\Models\Character\CharacterSkill;
 use Seat\Eveapi\Models\Corporation\CorporationInfo;
 use Seat\Eveapi\Models\Sde\InvType;
@@ -360,7 +361,9 @@ class FittingController extends Controller implements CalculateConstants
                 'name' => $character->characterName,
             ];
 
-            $characterSkills = $this->getCharacterSkillsInformation($character->characterID);
+//            $characterSkills = $this->getCharacterSkillsInformation($character->characterID);
+            $characterSkills = CharacterInfo::with('skills')->where('character_id', $character->characterID)->get();
+            dd($characterSkills);
 
             foreach ($characterSkills as $skill) {
                 $rank = DgmTypeAttributes::where('typeID', $skill->typeID)->where('attributeID', '275')->first();
@@ -452,15 +455,18 @@ class FittingController extends Controller implements CalculateConstants
         $characters = collect();
  
         if ($alliance_id !== '0') {
-            $alliance = Alliance::find($alliance_id);
-            $corps = AllianceMember::where('alliance_id', $alliance_id)->get();
-            foreach ($corps as $corp) {
-                $chars = CharacterInfo::where('corporation_id', $corp->corporation_id)->get();
-                $characters = $characters->concat($chars);
-            }
+
+            $chars = CharacterInfo::with('skills')->whereHas('affiliation', function ($affiliation) use ($alliance_id) {
+                $affiliation->where('alliance_id', $alliance_id);
+            })->get();
+            $characters = $characters->concat($chars);
+
         } else {
-            $characters = CharacterInfo::where('corporation_id', $corp_id)->get();
+            $characters = CharacterInfo::with('skills')->whereHas('affiliation', function ($affiliation) use ($corp_id) {
+                $affiliation->where('corporation_id', $corp_id);
+            })->get();
         }
+
 
         $doctrine = Doctrine::where('id', $doctrine_id)->first();
         $fittings = $doctrine->fittings;
@@ -469,13 +475,11 @@ class FittingController extends Controller implements CalculateConstants
         $data = [];
         $data['fittings'] = [];
         $data['totals'] = [];
-
         foreach ($characters as $character) {
-            $characterSkills = $this->getCharacterSkillsInformation($character->character_id);
             $charData[$character->character_id]['name'] = $character->name;
             $charData[$character->character_id]['skills'] = [];
 
-            foreach ($characterSkills as $skill) {
+            foreach ($character->skills as $skill) {
                 $charData[$character->character_id]['skills'][$skill->skill_id] = $skill->trained_skill_level;
             }
         }
