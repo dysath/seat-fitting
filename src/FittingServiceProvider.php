@@ -13,12 +13,11 @@ class FittingServiceProvider extends AbstractSeatPlugin
      */
     public function boot()
     {
-        //$this->addCommands();
         $this->add_routes();
-        // $this->add_middleware($router);
         $this->add_views();
-        $this->add_publications();
         $this->add_translations();
+
+        $this->addMigrations();
     }
 
     /**
@@ -66,11 +65,9 @@ class FittingServiceProvider extends AbstractSeatPlugin
             __DIR__ . '/Config/Permissions/fitting.permissions.php', 'fitting');
     }
 
-    public function add_publications()
+    private function addMigrations()
     {
-        $this->publishes([
-            __DIR__ . '/database/migrations/' => database_path('migrations')
-        ]);
+        $this->loadMigrationsFrom(__DIR__ . '/database/migrations/');
     }
 
     private function addCommands()
