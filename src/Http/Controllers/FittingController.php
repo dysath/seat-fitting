@@ -10,12 +10,12 @@ use Seat\Eveapi\Models\Alliances\AllianceMember;
 use Seat\Eveapi\Models\Character\CharacterInfo;
 use Seat\Eveapi\Models\Character\CharacterSkill;
 use Seat\Eveapi\Models\Corporation\CorporationInfo;
+use Seat\Eveapi\Models\Sde\InvType;
+use Seat\Eveapi\Models\Sde\DgmTypeAttribute;
 use Denngarr\Seat\Fitting\Helpers\CalculateConstants;
 use Denngarr\Seat\Fitting\Helpers\CalculateEft;
 use Denngarr\Seat\Fitting\Models\Fitting;
 use Denngarr\Seat\Fitting\Models\Doctrine;
-use Denngarr\Seat\Fitting\Models\Sde\InvType;
-use Denngarr\Seat\Fitting\Models\Sde\DgmTypeAttributes;
 use Denngarr\Seat\Fitting\Validation\FittingValidation;
 use Denngarr\Seat\Fitting\Validation\DoctrineValidation;
 
@@ -135,7 +135,7 @@ class FittingController extends Controller implements CalculateConstants
 
             foreach ($character->skills as $skill) {
 
-                $rank = DgmTypeAttributes::where('typeID', $skill->skill_id)->where('attributeID', '275')->first();
+                $rank = DgmTypeAttribute::where('typeID', $skill->skill_id)->where('attributeID', '275')->first();
 
                 $skillsToons['characters'][$index]['skill'][$skill->skill_id]['level'] = $skill->trained_skill_level;
                 $skillsToons['characters'][$index]['skill'][$skill->skill_id]['rank']  = $rank->valueFloat;
@@ -148,7 +148,7 @@ class FittingController extends Controller implements CalculateConstants
                     continue;
                 }
 
-                $rank = DgmTypeAttributes::where('typeID', $skill['typeId'])->where('attributeID', '275')->first();
+                $rank = DgmTypeAttribute::where('typeID', $skill['typeId'])->where('attributeID', '275')->first();
 
                 $skillsToons['characters'][$index]['skill'][$skill['typeId']]['level'] = 0;
                 $skillsToons['characters'][$index]['skill'][$skill['typeId']]['rank'] = $rank->valueFloat;

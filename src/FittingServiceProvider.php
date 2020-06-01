@@ -58,9 +58,6 @@ class FittingServiceProvider extends AbstractSeatPlugin
             'package.sidebar'
         );
 
-        // $this->mergeConfigFrom(
-        //     __DIR__ . '/Config/fitting.permissions.php', 'web.permissions');
-        
         $this->registerPermissions(
             __DIR__ . '/Config/Permissions/fitting.permissions.php', 'fitting');
     }
