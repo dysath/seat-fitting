@@ -2,15 +2,13 @@
 
 namespace Denngarr\Seat\Fitting\Http\Controllers;
 
-// use Seat\Services\Repositories\Character\Info;
-// use Seat\Services\Repositories\Character\Skills;
-// use Seat\Services\Repositories\Configuration\UserRespository;
 use Illuminate\Support\Facades\Gate;
 use Seat\Web\Http\Controllers\Controller;
 use Seat\Web\Models\Acl\Role;
 use Seat\Eveapi\Models\Alliances\Alliance;
 use Seat\Eveapi\Models\Alliances\AllianceMember;
 use Seat\Eveapi\Models\Character\CharacterInfo;
+use Seat\Eveapi\Models\Character\CharacterSkill;
 use Seat\Eveapi\Models\Corporation\CorporationInfo;
 use Denngarr\Seat\Fitting\Helpers\CalculateConstants;
 use Denngarr\Seat\Fitting\Helpers\CalculateEft;
@@ -144,7 +142,13 @@ class FittingController extends Controller implements CalculateConstants
             $skillsToons['characters'][$index]['id']   = $character->character_id;
             $skillsToons['characters'][$index]['name'] = $character->name;
 
-            $characterSkills = $this->getCharacterSkillsInformation($character->character_id);
+            $characterSkills = CharacterSkill::join('invTypes',
+                'character_skills.skill_id', '=',
+                'invTypes.typeID')
+                ->join('invGroups', 'invTypes.groupID', '=', 'invGroups.groupID')
+                ->where('character_skills.character_id', $character->character_id)
+                ->orderBy('invTypes.typeName')
+                ->get();
 
             foreach ($characterSkills as $skill) {
 
