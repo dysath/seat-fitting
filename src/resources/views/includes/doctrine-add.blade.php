@@ -3,10 +3,10 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header bg-primary">
+                    <h4 class="modal-title">Add a New Doctrine</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
-                    <h4 class="modal-title">Add a New Doctrine</h4>
                 </div>
                 {{ csrf_field() }}
                 <div class="modal-body">

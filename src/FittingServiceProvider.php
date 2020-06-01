@@ -2,7 +2,7 @@
 
 namespace Denngarr\Seat\Fitting;
 
-use App\Providers\AbstractSeatPlugin;
+use Seat\Services\AbstractSeatPlugin;
 
 class FittingServiceProvider extends AbstractSeatPlugin
 {

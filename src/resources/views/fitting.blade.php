@@ -7,13 +7,13 @@
     <div class="card card-primary card-solid">
         <div class="card-header">
            <h3 class="card-title">Fittings</h3>
-           @if (auth()->user()->has('fitting.create', false)) 
+           @can('fitting.create')
            <div class="card-tools pull-right">
                <button type="button" class="btn btn-xs btn-tool" id="addFitting" data-toggle="tooltip" data-placement="top" title="Add a new fitting">
                    <span class="fa fa-plus-square"></span>
                </button>
            </div>
-           @endif
+           @endcan
         </div>
         <div class="card-body">
         <table id='fitlist' class="table table-hover" style="vertical-align: top">
@@ -36,14 +36,14 @@
                      <button type="button" id="viewfit" class="btn btn-xs btn-success" data-id="{{ $fit['id'] }}" data-toggle="tooltip" data-placement="top" title="View Fitting">
                          <span class="fa fa-eye text-white"></span>
                      </button>
-                     @if (auth()->user()->has('fitting.create', false)) 
+                     @can('fitting.create')
                      <button type="button" id="editfit" class="btn btn-xs btn-warning" data-id="{{ $fit['id'] }}" data-toggle="tooltip" data-placement="top" title="Edit Fitting">
                          <span class="fas fa-edit text-white"></span>
                      </button>
                      <button type="button" id="deletefit" class="btn btn-xs btn-danger" data-id="{{ $fit['id'] }}" data-toggle="tooltip" data-placement="top" title="Delete Fitting">
                          <span class="fa fa-trash text-white"></span>
                      </button>
-                     @endif
+                     @endcan
                  </td>
              </tr>
              @endforeach
@@ -66,8 +66,8 @@
        <div class="modal-dialog" role="document">
          <div class="modal-content">
            <div class="modal-header bg-primary">
-             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
              <h4 class="modal-title">Are you sure?</h4>
+             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
            </div>
            <form role="form" action="{{ route('fitting.saveFitting') }}" method="post">
                <input type="hidden" id="fitSelection" name="fitSelection" value="0">
@@ -91,8 +91,8 @@
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header bg-primary">
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             <h4 class="modal-title">Are you sure?</h4>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
           </div>
           <div class="modal-body">
             <p>Are you sure you want to delete this fitting?</p>

@@ -2,9 +2,10 @@
 
 namespace Denngarr\Seat\Fitting\Http\Controllers;
 
-use Seat\Services\Repositories\Character\Info;
-use Seat\Services\Repositories\Character\Skills;
-use Seat\Services\Repositories\Configuration\UserRespository;
+// use Seat\Services\Repositories\Character\Info;
+// use Seat\Services\Repositories\Character\Skills;
+// use Seat\Services\Repositories\Configuration\UserRespository;
+use Illuminate\Support\Facades\Gate;
 use Seat\Web\Http\Controllers\Controller;
 use Seat\Web\Models\Acl\Role;
 use Seat\Eveapi\Models\Alliances\Alliance;
@@ -22,7 +23,7 @@ use Denngarr\Seat\Fitting\Validation\DoctrineValidation;
 
 class FittingController extends Controller implements CalculateConstants
 {
-    use CalculateEft, UserRespository, Skills, Info;
+    use CalculateEft;
 
     private $requiredSkills = [];
 
@@ -218,7 +219,7 @@ class FittingController extends Controller implements CalculateConstants
         $corps = [];
         $fitlist = $this->getFittingList();
 
-        if (auth()->user()->hasSuperUser()) {
+        if (Gate::allows('global.superuser')) {
             $corpnames = CorporationInfo::all();
         } else {
             $corpids = CharacterInfo::whereIn('character_id', auth()->user()->associatedCharacterIds())->select('corporation_id')->get()->toArray();

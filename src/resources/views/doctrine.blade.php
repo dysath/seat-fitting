@@ -7,13 +7,13 @@
     <div class="card card-primary card-solid">
         <div class="card-header">
            <h3 class="card-title">Doctrines</h3>
-           @if (auth()->user()->has('fitting.create', false)) 
+           @can('fitting.create')
            <div class="card-tools pull-right">
                <button type="button" class="btn btn-xs btn-tool" id="newDoctrine" data-toggle="modal" data-toggle="tooltip" data-target="#addDoctrine" data-placement="top" title="Create a new doctrine">
                    <span class="fa fa-plus-square"></span>
                </button>
            </div>
-           @endif
+           @endcan
         </div>
         <div class="card-body">
         <div class="input-group">
@@ -24,14 +24,16 @@
               @endforeach
           </select>
           <div class="input-group-btn">
-              @if ((auth()->user()->has('fitting.create', false)) && (!empty($doctrine_list)))
-              <button type="button" id="editDoctrine" class="btn btn-warning" disabled="disabled" data-id="" data-toggle="modal" data-target="#addDoctrine" data-toggle="tooltip" data-placement="top" title="Edit Doctrine" inactive>
-                  <span class="fas fa-edit text-white"></span>
-              </button>
-              <button type="button" id="deleteDoctrine" class="btn btn-danger" disabled="disabled" data-id="" data-toggle="tooltip" data-placement="top" title="Delete Doctrine">
-                  <span class="fa fa-trash text-white"></span>
-              </button>
-              @endif
+              @can('fitting.create')
+              @if (!empty($doctrine_list)))
+                <button type="button" id="editDoctrine" class="btn btn-warning" disabled="disabled" data-id="" data-toggle="modal" data-target="#addDoctrine" data-toggle="tooltip" data-placement="top" title="Edit Doctrine" inactive>
+                    <span class="fas fa-edit text-white"></span>
+                </button>
+                <button type="button" id="deleteDoctrine" class="btn btn-danger" disabled="disabled" data-id="" data-toggle="tooltip" data-placement="top" title="Delete Doctrine">
+                    <span class="fa fa-trash text-white"></span>
+                </button>
+                @endif
+              @endcan
           </div>
         </div>
         <hr>
@@ -62,8 +64,8 @@
        <div class="modal-dialog" role="document">
          <div class="modal-content">
            <div class="modal-header bg-primary">
-             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
              <h4 class="modal-title">Are you sure?</h4>
+             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
            </div>
            <form role="form" action="{{ route('fitting.saveFitting') }}" method="post">
                <input type="hidden" id="fitSelection" name="fitSelection" value="0">
@@ -87,8 +89,8 @@
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header bg-primary">
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             <h4 class="modal-title">Are you sure?</h4>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
           </div>
           <div class="modal-body">
             <p>Are you sure you want to delete this fitting?</p>
