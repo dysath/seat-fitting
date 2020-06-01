@@ -124,38 +124,21 @@ class FittingController extends Controller implements CalculateConstants
 
         $fitting = Fitting::find($id);
         $skillsToons['skills'] = $this->calculate($fitting->eftfitting);
-        $characterIds = auth()->user()->associatedCharacterIds();
+        $skilledCharacters = CharacterInfo::with('skills')->whereIn('character_id', auth()->user()->associatedCharacterIds())->get();
 
-        foreach ($characterIds as $characterId) {
-            $character = CharacterInfo::where('character_id', $characterId)->first();
-
-            // Sometimes you'll have character_id associated, but the update job hasn't run.
-            if ($character != null) {
-                array_push($characters, $character);
-            }
-        }
-
-        foreach ($characters as $character) {
+        foreach ($skilledCharacters as $character) {
 
             $index = $character->character_id;
 
             $skillsToons['characters'][$index]['id']   = $character->character_id;
             $skillsToons['characters'][$index]['name'] = $character->name;
 
-            $characterSkills = CharacterSkill::join('invTypes',
-                'character_skills.skill_id', '=',
-                'invTypes.typeID')
-                ->join('invGroups', 'invTypes.groupID', '=', 'invGroups.groupID')
-                ->where('character_skills.character_id', $character->character_id)
-                ->orderBy('invTypes.typeName')
-                ->get();
+            foreach ($character->skills as $skill) {
 
-            foreach ($characterSkills as $skill) {
+                $rank = DgmTypeAttributes::where('typeID', $skill->skill_id)->where('attributeID', '275')->first();
 
-                $rank = DgmTypeAttributes::where('typeID', $skill->typeID)->where('attributeID', '275')->first();
-
-                $skillsToons['characters'][$index]['skill'][$skill->typeID]['level'] = $skill->trained_skill_level;
-                $skillsToons['characters'][$index]['skill'][$skill->typeID]['rank']  = $rank->valueFloat;
+                $skillsToons['characters'][$index]['skill'][$skill->skill_id]['level'] = $skill->trained_skill_level;
+                $skillsToons['characters'][$index]['skill'][$skill->skill_id]['rank']  = $rank->valueFloat;
             }
 
             // Fill in missing skills so Javascript doesn't barf and you have the correct rank
