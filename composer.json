@@ -1,12 +1,12 @@
 {
-    "name": "denngarr/seat-fitting",
+    "name": "flyingferret/seat-fitting",
     "description": "Module to check fittings per character",
     "type": "seat-plugin",
     "license": "GPL-2.0-only",
     "authors": [
         {
-            "name": "Denngarr B'tarn",
-            "email": "ed.stafford@gmail.com"
+            "name": "Kalaik",
+            "email": "kalaikutama88@gmail.com"
         }
     ],
     "minimum-stability": "stable",
@@ -18,7 +18,7 @@
      "extra": {
         "laravel": {
             "providers": [
-                "Denngarr\\Seat\\Fitting\\FittingServiceProvider"
+                "flyingferret\\Seat\\Fitting\\FittingServiceProvider"
             ]
         }
     },
