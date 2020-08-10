@@ -439,13 +439,15 @@ class FittingController extends Controller implements CalculateConstants
         $corps = CorporationInfo::all();
         $alliances = array();
 
+        $allids = array();
+
         foreach ($corps as $corp) {
             if (!is_null($corp->alliance_id)) {
-                $alliance = Alliance::firstWhere('alliance_id', $corp->alliance_id);
-                if (!is_null($alliance))
-                    array_push($alliances, $alliance);
+                array_push($allids, $corp->alliance_id);
             }
         }
+
+        $alliances = Alliance::whereIn('alliance_id', $allids)->get();
 
         return view('fitting::doctrinereport', compact('doctrines', 'corps', 'alliances'));
     }
