@@ -441,7 +441,9 @@ class FittingController extends Controller implements CalculateConstants
 
         foreach ($corps as $corp) {
             if (!is_null($corp->alliance_id)) {
-                array_push($alliances, Alliance::find($corp->alliance_id));
+                $alliance = Alliance::firstWhere('alliance_id', $corp->alliance_id);
+                if (!is_null($alliance))
+                    array_push($alliances, $alliance);
             }
         }
 

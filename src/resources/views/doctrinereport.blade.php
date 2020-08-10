@@ -47,7 +47,7 @@
         <div class="row">
             <div class="col-md-12">
                 <button type="button" id="runreport" class="btn btn-info btn-flat">
-                    <span class="fa fa-refresh"></span>
+                    <span class="fa fa-sync"></span>
                     Run Report
                 </button>
             </div>
@@ -84,7 +84,7 @@
         corpid = $('#corporations').find(":selected").val();
         doctrineid = $('#doctrines').find(":selected").val();
 
-        button.find('span').addClass('fa-spin');
+        button.find('span').addClass('fas fa-spinner');
 
         //
         // hide pane while loading data
@@ -147,15 +147,15 @@
 
                 for (var ships in result.chars[char]) {
                     if (result.chars[char][ships].ship == true) {
-                        body = body + "<td style='text-align: center; width: 10em;'><span class='label label-success'>HULL</span> / ";
+                        body = body + "<td style='text-align: center; width: 10em;'><span class='badge badge-success'>HULL</span> / ";
                     } else {
-                        body = body + "<td style='text-align: center; width: 10em;'><span class='label label-danger'>HULL</span> / ";
+                        body = body + "<td style='text-align: center; width: 10em;'><span class='badge badge-danger'>HULL</span> / ";
                     }
 
                     if (result.chars[char][ships].fit == true) {
-                        body = body + "<span class='label label-success'>FIT</span></td>";
+                        body = body + "<span class='badge badge-success'>FIT</span></td>";
                     } else {
-                        body = body + "<span class='label label-danger'>FIT</span></td>";
+                        body = body + "<span class='badge badge-danger'>FIT</span></td>";
                     }
                 }
 
