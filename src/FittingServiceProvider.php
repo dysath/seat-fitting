@@ -80,7 +80,7 @@ class FittingServiceProvider extends AbstractSeatPlugin
      */
     public function getName(): string
     {
-        return 'SRP';
+        return 'Fitting';
     }
 
 

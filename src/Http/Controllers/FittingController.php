@@ -26,7 +26,7 @@ class FittingController extends Controller implements CalculateConstants
 
     private $requiredSkills = [];
 
-    public function getDoctrineEdit($doctrine_id) 
+    public function getDoctrineEdit($doctrine_id)
     {
         $selected = [];
         $unselected = [];
@@ -37,7 +37,7 @@ class FittingController extends Controller implements CalculateConstants
 
         foreach ($doctrine_fittings as $doctrine_fitting) {
             array_push($doctrine_fits, $doctrine_fitting->id);
-        }       
+        }
 
         foreach ($fittings as $fitting) {
             $ship = InvType::where('typeName', $fitting->shiptype)->first();
@@ -64,23 +64,23 @@ class FittingController extends Controller implements CalculateConstants
         ];
     }
 
-    public function getDoctrineList() 
+    public function getDoctrineList()
     {
-         $doctrine_names = [];
+        $doctrine_names = [];
 
-         $doctrines = Doctrine::all();
-         
-         if (count($doctrines) > 0) {
+        $doctrines = Doctrine::all();
 
-             foreach ($doctrines as $doctrine) {
-                 array_push($doctrine_names, [
-                     'id' => $doctrine->id,
-                     'name' => $doctrine->name,
-                 ]);
-             }
-         }
+        if (count($doctrines) > 0) {
 
-         return $doctrine_names;
+            foreach ($doctrines as $doctrine) {
+                array_push($doctrine_names, [
+                    'id' => $doctrine->id,
+                    'name' => $doctrine->name,
+                ]);
+            }
+        }
+
+        return $doctrine_names;
     }
 
     public function getDoctrineById($id)
@@ -91,14 +91,14 @@ class FittingController extends Controller implements CalculateConstants
         $fittings = $doctrine->fittings()->get();
 
         foreach ($fittings as $fitting) {
-          $ship = InvType::where('typeName', $fitting->shiptype)->first();
+            $ship = InvType::where('typeName', $fitting->shiptype)->first();
 
-          array_push($fitting_list, [
-              'id' => $fitting->id,
-              'name' => $fitting->fitname,
-              'shipType' => $fitting->shiptype, 
-              'shipImg' => $ship->typeID,
-          ]);
+            array_push($fitting_list, [
+                'id' => $fitting->id,
+                'name' => $fitting->fitname,
+                'shipType' => $fitting->shiptype,
+                'shipImg' => $ship->typeID,
+            ]);
         }
 
         return $fitting_list;
@@ -215,7 +215,7 @@ class FittingController extends Controller implements CalculateConstants
         }
 
         foreach ($corpnames as $corp) {
-          $corps[$corp->corporation_id] = $corp->name;
+            $corps[$corp->corporation_id] = $corp->name;
         }
 
         return view('fitting::fitting', compact('fitlist', 'corps'));
@@ -259,11 +259,11 @@ class FittingController extends Controller implements CalculateConstants
         $jsfit = [];
         $data = preg_split("/\r?\n\r?\n/", $eft);
         $jsfit['eft'] = $eft;
-     
+
         $header = preg_split("/\r?\n/", $data[0]);
 
         list($jsfit['shipname'], $jsfit['fitname']) = explode(",", substr($header[0], 1, -1));
-        array_shift($header); 
+        array_shift($header);
         $data[0] = implode("\r\n", $header);
 
         // Deal with a blank line between the name and the first low slot    
@@ -292,7 +292,6 @@ class FittingController extends Controller implements CalculateConstants
             if (count($data) > 5) {
                 $drones = array_filter(preg_split("/\r?\n/", $data[5]));
             }
-
         }
 
         $this->loadSlot($jsfit, "LoSlot", $lowslot);
@@ -302,9 +301,9 @@ class FittingController extends Controller implements CalculateConstants
         if (isset($subslot)) {
             $this->loadSlot($jsfit, "SubSlot", $subslot);
         }
-        
+
         $this->loadSlot($jsfit, "RigSlot", $rigs);
-        
+
         if (isset($drones)) {
             foreach ($drones as $slot) {
                 list($drone, $qty) = explode(" x", $slot);
@@ -314,19 +313,19 @@ class FittingController extends Controller implements CalculateConstants
                     'name' => $drone,
                     'qty'  => $qty,
                 ];
-            } 
+            }
         }
         return $jsfit;
     }
 
-    private function loadSlot(&$jsfit, $slotname, $slots) 
+    private function loadSlot(&$jsfit, $slotname, $slots)
     {
         $index = 0;
 
         foreach ($slots as $slot) {
             $module = explode(",", $slot);
 
-            if (! preg_match("/\[Empty .+ slot\]/", $module[0])) {
+            if (!preg_match("/\[Empty .+ slot\]/", $module[0])) {
                 $item = InvType::where('typeName', $module[0])->first();
 
                 if (empty($item)) {
@@ -361,9 +360,8 @@ class FittingController extends Controller implements CalculateConstants
                 'name' => $character->characterName,
             ];
 
-//            $characterSkills = $this->getCharacterSkillsInformation($character->characterID);
+            //            $characterSkills = $this->getCharacterSkillsInformation($character->characterID);
             $characterSkills = CharacterInfo::with('skills')->where('character_id', $character->characterID)->get();
-            dd($characterSkills);
 
             foreach ($characterSkills as $skill) {
                 $rank = DgmTypeAttributes::where('typeID', $skill->typeID)->where('attributeID', '275')->first();
@@ -435,16 +433,16 @@ class FittingController extends Controller implements CalculateConstants
         return redirect()->route('fitting.doctrineview');
     }
 
-    public function viewDoctrineReport() 
+    public function viewDoctrineReport()
     {
         $doctrines = Doctrine::all();
         $corps = CorporationInfo::all();
         $alliances = array();
 
         foreach ($corps as $corp) {
-          if (!is_null($corp->alliance_id)) {
-            array_push($alliances, Alliance::find($corp->alliance_id)); 
-          }
+            if (!is_null($corp->alliance_id)) {
+                array_push($alliances, Alliance::find($corp->alliance_id));
+            }
         }
 
         return view('fitting::doctrinereport', compact('doctrines', 'corps', 'alliances'));
@@ -453,14 +451,13 @@ class FittingController extends Controller implements CalculateConstants
     public function runReport($alliance_id, $corp_id, $doctrine_id)
     {
         $characters = collect();
- 
+
         if ($alliance_id !== '0') {
 
             $chars = CharacterInfo::with('skills')->whereHas('affiliation', function ($affiliation) use ($alliance_id) {
                 $affiliation->where('alliance_id', $alliance_id);
             })->get();
             $characters = $characters->concat($chars);
-
         } else {
             $characters = CharacterInfo::with('skills')->whereHas('affiliation', function ($affiliation) use ($corp_id) {
                 $affiliation->where('corporation_id', $corp_id);
@@ -486,11 +483,11 @@ class FittingController extends Controller implements CalculateConstants
 
         foreach ($fittings as $fitting) {
             $fit = Fitting::find($fitting->id);
-            
+
             array_push($data['fittings'], $fit->fitname);
-            
+
             $this->requiredSkills = [];
-            $shipSkills = $this->calculate("[".$fit->shiptype.", a]");
+            $shipSkills = $this->calculate("[" . $fit->shiptype . ", a]");
 
             foreach ($shipSkills as $shipSkill) {
                 $fitData[$fitting->id]['shipskills'][$shipSkill['typeId']] = $shipSkill['level'];
@@ -504,9 +501,9 @@ class FittingController extends Controller implements CalculateConstants
                 $fitData[$fitting->id]['skills'][$fitSkill['typeId']] = $fitSkill['level'];
             }
         }
-        
+
         foreach ($charData as $char) {
-   
+
             foreach ($fitData as $fit) {
                 $canflyfit = true;
                 $canflyship = true;
@@ -514,28 +511,28 @@ class FittingController extends Controller implements CalculateConstants
                 foreach ($fit['skills'] as $skill_id => $level) {
                     if (isset($char['skills'][$skill_id])) {
                         if ($char['skills'][$skill_id] < $level) {
-                            $canflyfit = false; 
+                            $canflyfit = false;
                         }
                     } else {
-                        $canflyfit = false; 
+                        $canflyfit = false;
                     }
                 }
 
                 foreach ($fit['shipskills'] as $skill_id => $level) {
                     if (isset($char['skills'][$skill_id])) {
                         if ($char['skills'][$skill_id] < $level) {
-                            $canflyship = false; 
+                            $canflyship = false;
                         }
                     } else {
-                        $canflyship = false; 
+                        $canflyship = false;
                     }
                 }
 
                 if (!isset($data['totals'][$fit['name']]['ship'])) {
-                     $data['totals'][$fit['name']]['ship'] = 0;
+                    $data['totals'][$fit['name']]['ship'] = 0;
                 }
                 if (!isset($data['totals'][$fit['name']]['fit'])) {
-                     $data['totals'][$fit['name']]['fit'] = 0;
+                    $data['totals'][$fit['name']]['fit'] = 0;
                 }
 
                 $data['chars'][$char['name']][$fit['name']]['ship'] = false;

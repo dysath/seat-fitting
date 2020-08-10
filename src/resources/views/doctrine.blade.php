@@ -202,7 +202,7 @@
     $('#eftexport').hide();
     $('#showeft').val('');
 
-    $('#fitlist').DataTable();
+    var fitListTable = $('#fitlist').DataTable();
 
     $('#addFitting').on('click', function () {
         $('#fitEditModal').modal('show');
@@ -335,6 +335,7 @@
                 timeout: 10000
             }).done( function (result) {
                 if (result) {
+                    fitListTable.destroy();
                     $('#fitlist').find("tbody").empty();
                     for (var fitting in result) {
                         row = "<tr><td><img src='https://image.eveonline.com/Type/" + result[fitting].shipImg + "_32.png' height='24' /></td>";
@@ -344,6 +345,7 @@
                         row = row + "<span class='fa fa-eye text-white'></span></button></td></tr>";
                         $('#fitlist').find("tbody").append(row);
                     }
+                    fitListTable = $('#fitlist').DataTable();
                 }
             });
         } else {

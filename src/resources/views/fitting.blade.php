@@ -32,7 +32,7 @@
                  <td><img src='https://image.eveonline.com/Type/{{ $fit['typeID'] }}_32.png' height='24' /></td>
                  <td>{{ $fit['shiptype'] }}</td>
                  <td>{{ $fit['fitname'] }}</td>
-                 <td class="no-hover pull-right">
+                 <td class="no-hover pull-right" style="min-width:80px">
                      <button type="button" id="viewfit" class="btn btn-xs btn-success" data-id="{{ $fit['id'] }}" data-toggle="tooltip" data-placement="top" title="View Fitting">
                          <span class="fa fa-eye text-white"></span>
                      </button>
