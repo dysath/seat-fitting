@@ -232,7 +232,7 @@ class FittingController extends Controller implements CalculateConstants
     {
         $fitting = new Fitting();
 
-        if ($request->fitSelection > 1) {
+        if ($request->fitSelection > 0) {
             $fitting = Fitting::find($request->fitSelection);
         }
 
