@@ -108,7 +108,7 @@
             url: "/fitting/runReport/" + allianceid + "/" + corpid + "/" + doctrineid,
             type: "GET",
             datatype: 'json',
-            timeout: 10000
+            timeout: 60000
         }).done( function (result) {
 
             header = "";
