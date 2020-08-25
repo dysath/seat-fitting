@@ -4,11 +4,11 @@
 @section('page_header', trans('fitting::fitting.list'))
 
 @section('full')
-<div class="box box-primary box-solid">
-    <div class="box-header">
-        <h3 class="box-title">Doctrine Report</h3>
+<div class="card card-primary card-solid">
+    <div class="card-header">
+        <h3 class="card-title">Doctrine Report</h3>
     </div>
-    <div class="box-body">
+    <div class="card-body">
         <div class="row">
             <div class="col-md-6 col-lg-3">
                 <div class="form-group">
@@ -47,7 +47,7 @@
         <div class="row">
             <div class="col-md-12">
                 <button type="button" id="runreport" class="btn btn-info btn-flat">
-                    <span class="fa fa-refresh"></span>
+                    <span class="fa fa-sync"></span>
                     Run Report
                 </button>
             </div>
@@ -55,8 +55,8 @@
     </div>
 </div>
 
-<div class="box box-primary box-solid" id="reportbox">
-    <div class="box-body">
+<div class="card card-primary card-solid" id="reportbox">
+    <div class="card-body">
         <div class="table-responsive" style="overflow: auto">
             <table id="report" class="table table-condensed table-striped no-footer">
             <thead>
@@ -84,7 +84,7 @@
         corpid = $('#corporations').find(":selected").val();
         doctrineid = $('#doctrines').find(":selected").val();
 
-        button.find('span').addClass('fa-spin');
+        button.find('span').addClass('fas fa-spinner');
 
         //
         // hide pane while loading data
@@ -108,7 +108,7 @@
             url: "/fitting/runReport/" + allianceid + "/" + corpid + "/" + doctrineid,
             type: "GET",
             datatype: 'json',
-            timeout: 10000
+            timeout: 60000
         }).done( function (result) {
 
             header = "";
@@ -147,15 +147,15 @@
 
                 for (var ships in result.chars[char]) {
                     if (result.chars[char][ships].ship == true) {
-                        body = body + "<td style='text-align: center; width: 10em;'><span class='label label-success'>HULL</span> / ";
+                        body = body + "<td style='text-align: center; width: 10em;'><span class='badge badge-success'>HULL</span> / ";
                     } else {
-                        body = body + "<td style='text-align: center; width: 10em;'><span class='label label-danger'>HULL</span> / ";
+                        body = body + "<td style='text-align: center; width: 10em;'><span class='badge badge-danger'>HULL</span> / ";
                     }
 
                     if (result.chars[char][ships].fit == true) {
-                        body = body + "<span class='label label-success'>FIT</span></td>";
+                        body = body + "<span class='badge badge-success'>FIT</span></td>";
                     } else {
-                        body = body + "<span class='label label-danger'>FIT</span></td>";
+                        body = body + "<span class='badge badge-danger'>FIT</span></td>";
                     }
                 }
 

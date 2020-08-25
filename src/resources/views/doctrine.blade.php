@@ -4,18 +4,18 @@
 @section('page_header', trans('fitting::fitting.list'))
 
 @section('left')
-    <div class="box box-primary box-solid">
-        <div class="box-header">
-           <h3 class="box-title">Doctrines</h3>
-           @if (auth()->user()->has('fitting.create', false)) 
-           <div class="box-tools pull-right">
-               <button type="button" class="btn btn-xs btn-box-tool" id="newDoctrine" data-toggle="modal" data-toggle="tooltip" data-target="#addDoctrine" data-placement="top" title="Create a new doctrine">
+    <div class="card card-primary card-solid">
+        <div class="card-header">
+           <h3 class="card-title">Doctrines</h3>
+           @can('fitting.create')
+           <div class="card-tools pull-right">
+               <button type="button" class="btn btn-xs btn-tool" id="newDoctrine" data-toggle="modal" data-toggle="tooltip" data-target="#addDoctrine" data-placement="top" title="Create a new doctrine">
                    <span class="fa fa-plus-square"></span>
                </button>
            </div>
-           @endif
+           @endcan
         </div>
-        <div class="box-body">
+        <div class="card-body">
         <div class="input-group">
           <select id="doctrineSpinner" class="form-control">
               <option value="0">Choose Doctrine....</option>
@@ -24,14 +24,16 @@
               @endforeach
           </select>
           <div class="input-group-btn">
-              @if ((auth()->user()->has('fitting.create', false)) && (!empty($doctrine_list)))
-              <button type="button" id="editDoctrine" class="btn btn-warning" disabled="disabled" data-id="" data-toggle="modal" data-target="#addDoctrine" data-toggle="tooltip" data-placement="top" title="Edit Doctrine" inactive>
-                  <span class="fa fa-pencil text-white"></span>
-              </button>
-              <button type="button" id="deleteDoctrine" class="btn btn-danger" disabled="disabled" data-id="" data-toggle="tooltip" data-placement="top" title="Delete Doctrine">
-                  <span class="fa fa-trash text-white"></span>
-              </button>
-              @endif
+              @can('fitting.create')
+              @if (!empty($doctrine_list)))
+                <button type="button" id="editDoctrine" class="btn btn-warning" disabled="disabled" data-id="" data-toggle="modal" data-target="#addDoctrine" data-toggle="tooltip" data-placement="top" title="Edit Doctrine" inactive>
+                    <span class="fas fa-edit text-white"></span>
+                </button>
+                <button type="button" id="deleteDoctrine" class="btn btn-danger" disabled="disabled" data-id="" data-toggle="tooltip" data-placement="top" title="Delete Doctrine">
+                    <span class="fa fa-trash text-white"></span>
+                </button>
+                @endif
+              @endcan
           </div>
         </div>
         <hr>
@@ -49,11 +51,11 @@
         </div>
     </div>
 
-    <div class="box box-primary box-solid" id='eftexport'>
-        <div class="box-header">
-           <h3 class="box-title">EFT Fitting</h3>
+    <div class="card card-primary card-solid" id='eftexport'>
+        <div class="card-header">
+           <h3 class="card-title">EFT Fitting</h3>
         </div>
-        <div class="box-body">
+        <div class="card-body">
             <textarea name="showeft" id="showeft" rows="15" style="width: 100%" onclick="this.focus();this.select()" readonly="readonly"></textarea>
         </div>
     </div>
@@ -62,8 +64,8 @@
        <div class="modal-dialog" role="document">
          <div class="modal-content">
            <div class="modal-header bg-primary">
-             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
              <h4 class="modal-title">Are you sure?</h4>
+             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
            </div>
            <form role="form" action="{{ route('fitting.saveFitting') }}" method="post">
                <input type="hidden" id="fitSelection" name="fitSelection" value="0">
@@ -87,8 +89,8 @@
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header bg-primary">
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             <h4 class="modal-title">Are you sure?</h4>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
           </div>
           <div class="modal-body">
             <p>Are you sure you want to delete this fitting?</p>
@@ -104,10 +106,10 @@
 
 @endsection
 @section('center')
-    <div class="box box-primary box-solid" id="fitting-box">
-        <div class="box-header"><h3 class="box-title" id='middle-header'></h3></div>
+    <div class="card card-primary card-solid" id="fitting-box">
+        <div class="card-header"><h3 class="card-title" id='middle-header'></h3></div>
         <input type="hidden" id="fittingId" value=""\>
-        <div class="box-body">
+        <div class="card-body">
             <div id="fitting-window">
                  <table class="table table-condensed table-striped" id="lowSlots">
                      <thead>
@@ -163,9 +165,9 @@
     </div>
 @endsection
 @section('right')
-    <div class="box box-primary box-solid" id="skills-box">
-        <div class="box-header form-group"><h3 class="box-title" id="skill-title">Required Skills</h3></div>
-        <div class="box-body">
+    <div class="card card-primary card-solid" id="skills-box">
+        <div class="card-header form-group"><h3 class="card-title" id="skill-title">Required Skills</h3></div>
+        <div class="card-body">
             <div id="skills-window">
             <table class="table table-condensed">
             <tr>
@@ -200,7 +202,7 @@
     $('#eftexport').hide();
     $('#showeft').val('');
 
-    $('#fitlist').DataTable();
+    var fitListTable = $('#fitlist').DataTable();
 
     $('#addFitting').on('click', function () {
         $('#fitEditModal').modal('show');
@@ -333,6 +335,7 @@
                 timeout: 10000
             }).done( function (result) {
                 if (result) {
+                    fitListTable.destroy();
                     $('#fitlist').find("tbody").empty();
                     for (var fitting in result) {
                         row = "<tr><td><img src='https://image.eveonline.com/Type/" + result[fitting].shipImg + "_32.png' height='24' /></td>";
@@ -342,6 +345,7 @@
                         row = row + "<span class='fa fa-eye text-white'></span></button></td></tr>";
                         $('#fitlist').find("tbody").append(row);
                     }
+                    fitListTable = $('#fitlist').DataTable();
                 }
             });
         } else {

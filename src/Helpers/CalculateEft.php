@@ -2,8 +2,8 @@
 
 namespace Denngarr\Seat\Fitting\Helpers;
 
-use Denngarr\Seat\Fitting\Models\Sde\InvType;
-use Denngarr\Seat\Fitting\Models\Sde\DgmTypeAttributes;
+use Seat\Eveapi\Models\Sde\InvType;
+use Seat\Eveapi\Models\Sde\DgmTypeAttribute;
 
 trait CalculateEft 
 {
@@ -107,7 +107,7 @@ trait CalculateEft
         $attributeids = array_merge(array_keys(self::REQ_SKILLS_ATTR_LEVELS), array_values(self::REQ_SKILLS_ATTR_LEVELS));
 
         foreach ($typeIDs as $type) {
-            $res = DgmTypeAttributes::where('typeid', $type['typeID'])->wherein('attributeID', $attributeids)->get();
+            $res = DgmTypeAttribute::where('typeid', $type['typeID'])->wherein('attributeID', $attributeids)->get();
 
             if (count($res) == 0) {
                 continue;
