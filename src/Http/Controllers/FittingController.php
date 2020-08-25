@@ -210,7 +210,7 @@ class FittingController extends Controller implements CalculateConstants
         if (Gate::allows('global.superuser')) {
             $corpnames = CorporationInfo::all();
         } else {
-            $corpids = CharacterInfo::whereIn('character_id', auth()->user()->associatedCharacterIds())->select('corporation_id')->get()->toArray();
+            $corpids = CharacterAffiliation::whereIn('character_id', auth()->user()->associatedCharacterIds())->select('corporation_id')->get()->toArray();
             $corpnames = CorporationInfo::whereIn('corporation_id', $corpids)->get();
         }
 
