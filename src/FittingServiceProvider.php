@@ -119,14 +119,4 @@ class FittingServiceProvider extends AbstractSeatPlugin
     {
         return 'denngarr';
     }
-
-    /**
-     * Return the plugin installed version.
-     *
-     * @return string
-     */
-    public function getVersion(): string
-    {
-        return config('fitting.config.version');
-    }
 }
