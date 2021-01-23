@@ -279,7 +279,12 @@ class FittingController extends Controller implements CalculateConstants
 
         // init drones array
         if (count($data) > 4) {
+            //Deal with extra blank line between rigs and drones
             $drones = array_filter(preg_split("/\r?\n/", $data[4]));
+            if (empty($drones)) {
+                $data = array_splice($data, 1, count($data));
+                $drones = array_filter(preg_split("/\r?\n/", $data[4]));
+            }
         }
 
         // special case for tech 3 cruiser which may have sub-modules
