@@ -12,6 +12,11 @@ Route::group([
             'uses' => 'FittingController@getFittingView',
             'middleware' => 'can:fitting.view'
         ]);
+        Route::get('/about', [
+            'as'   => 'fitting.about',
+            'uses' => 'FittingController@getAboutView',
+            'middleware' => 'can:fitting.view'
+        ]);
         Route::post('/postfitting', [
             'as'   => 'fitting.postFitting',
             'uses' => 'FittingController@postFitting',

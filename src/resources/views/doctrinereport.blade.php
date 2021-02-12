@@ -3,6 +3,13 @@
 @section('title', trans('fitting::fitting.list'))
 @section('page_header', trans('fitting::fitting.list'))
 
+@push('head')
+<link rel = "stylesheet"
+   type = "text/css"
+   href = "https://snoopy.crypta.tech/snoopy/seat-fitting-report.css" />
+@endpush
+
+
 @section('full')
 <div class="card card-primary card-solid">
     <div class="card-header">
@@ -52,6 +59,9 @@
                 </button>
             </div>
         </div>
+    </div>
+    <div class="card-footer text-muted">
+        Plugin maintained by <a href="{{ route('fitting.about') }}"> {!! img('characters', 'portrait', 96057938, 64, ['class' => 'img-circle eve-icon small-icon']) !!} Crypta Electrica</a>. <span class="float-right snoopy" style="color: #fa3333;"><i class="fas fa-signal"></i></span>
     </div>
 </div>
 
