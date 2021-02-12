@@ -28,6 +28,13 @@ return [
                 'route' => 'fitting.doctrinereport',
                 'permission' => 'fitting.reportview'
             ],
+            'about' => [
+                'name' => 'About',
+                'icon' => 'fas fa-info',
+                'route_segment' => 'fitting',
+                'route' => 'fitting.about',
+                'permission' => 'fitting.view'
+            ],
         ]
     ]
 ];
