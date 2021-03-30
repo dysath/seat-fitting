@@ -253,14 +253,14 @@
             datatype: 'json',
         timeout: 10000
         }).done( function (result) {
-            $('#fitlist #fitid[data-id="'+id+'"]').remove();
+            $('#fitlist .fitid[data-id="'+id+'"]').remove();
         }).fail( function(xmlHttpRequest, textStatus, errorThrown) {
         });
     });
 
     $('#deleteConfirm').on('click', function () {
        id = $('#fitSelection').val();
-        $('#fitlist #fitid[data-id="'+id+'"]').remove();
+        $('#fitlist .fitid[data-id="'+id+'"]').remove();
         $.ajax({
         headers: function () {
         },
@@ -269,7 +269,7 @@
             datatype: 'json',
         timeout: 10000
         }).done( function (result) {
-            $('#fitlist #fitid[data-id="'+id+'"]').remove();
+            $('#fitlist .fitid[data-id="'+id+'"]').remove();
         }).fail( function(xmlHttpRequest, textStatus, errorThrown) {
         });
     });
