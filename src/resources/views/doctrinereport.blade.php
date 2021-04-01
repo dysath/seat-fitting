@@ -66,6 +66,9 @@
 </div>
 
 <div class="card card-primary card-solid" id="reportbox">
+    <div class="card-header bg-danger d-none" id="missing_warn">
+        <h3 class="card-title">It appears that you have duplicate fitting names. This will cause the report to not function correctly. Please amend your fittings names.</h3>
+    </div>
     <div class="card-body">
         <div class="table-responsive" style="overflow: auto">
             <table id="report" class="table table-condensed table-striped no-footer">
@@ -123,6 +126,12 @@
             datatype: 'json',
             timeout: 60000
         }).done( function (result) {
+
+            if (Object.keys(result.fittings).length != (Object.keys(result.totals).length - 1)) {
+                $('#missing_warn').removeClass('d-none');
+                console.log(Object.keys(result.fittings).length);
+                console.log(Object.keys(result.totals).length - 1);
+            }
 
             header = "";
 
