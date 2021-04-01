@@ -107,6 +107,8 @@
         //
         $('#reportbox').hide();
 
+        $('#missing_warn').addClass('d-none');
+
         //
         // in case datatable has already been set, ensure data are cleared from cache and destroy the instance
         //
@@ -129,8 +131,6 @@
 
             if (Object.keys(result.fittings).length != (Object.keys(result.totals).length - 1)) {
                 $('#missing_warn').removeClass('d-none');
-                console.log(Object.keys(result.fittings).length);
-                console.log(Object.keys(result.totals).length - 1);
             }
 
             header = "";
