@@ -1,8 +1,8 @@
 @extends('web::layouts.grids.4-4-4')
 
-@section('title', trans('srp::srp.about'))
-@section('page_header', trans('srp::srp.srp'))
-@section('page_description', trans('srp::srp.about'))
+@section('title', trans('fitting::fitting.about'))
+@section('page_header', trans('fitting::fitting.fitting'))
+@section('page_description', trans('fitting::fitting.about'))
 
 
 @push('head')
@@ -64,7 +64,7 @@
 
       <legend>Bugs and Feature Requests</legend>
 
-      <p>If you encounter a bug or have a suggestion, either contact Crypta-Eve on <a href="https://eveseat.github.io/docs/about/contact/">SeAT-Slack</a> or submit an <a href="https://github.com/dysath/seat-fitting/issues/new">issue on Github</a></p>
+      <p>If you encounter a bug or have a suggestion, either contact Crypta-Eve on <a href="https://eveseat.github.io/docs/about/contact/">SeAT-Discord</a> or submit an <a href="https://github.com/dysath/seat-fitting/issues/new">issue on Github</a></p>
 
     </div>
   </div>
