@@ -34,7 +34,7 @@
              <tbody>
              @if (count($fitlist) > 0)
              @foreach($fitlist as $fit)
-             <tr id="fitid" data-id="{{ $fit['id'] }}">
+             <tr class="fitid" data-id="{{ $fit['id'] }}">
                  <td><img src='https://image.eveonline.com/Type/{{ $fit['typeID'] }}_32.png' height='24' /></td>
                  <td>{{ $fit['shiptype'] }}</td>
                  <td>{{ $fit['fitname'] }}</td>
@@ -119,7 +119,7 @@
 @section('center')
     <div class="card card-primary card-solid" id="fitting-box">
         <div class="card-header"><h3 class="card-title" id='middle-header'></h3></div>
-        <input type="hidden" id="fittingId" value=""\>
+        <input type="hidden" id="fittingId" value="" />
         <div class="card-body">
             <div id="fitting-window">
                  <table class="table table-condensed table-striped" id="lowSlots">
@@ -289,7 +289,7 @@
 
     $('#deleteConfirm').on('click', function () {
        id = $('#fitSelection').val();
-        $('#fitlist #fitid[data-id="'+id+'"]').remove();
+        $('#fitlist .fitid[data-id="'+id+'"]').remove();
 
         $.ajax({
             headers: function () {
@@ -299,7 +299,7 @@
                 datatype: 'json',
             timeout: 10000
         }).done( function (result) {
-            $('#fitlist #fitid[data-id="'+id+'"]').remove();
+            $('#fitlist .fitid[data-id="'+id+'"]').remove();
         }).fail( function(xmlHttpRequest, textStatus, errorThrown) {
         });
     });
