@@ -94,7 +94,10 @@
         corpid = $('#corporations').find(":selected").val();
         doctrineid = $('#doctrines').find(":selected").val();
 
-        button.find('span').addClass('fas fa-spinner');
+        button.prop("disabled", true);
+        button.html(
+            `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...`
+        );
 
         //
         // hide pane while loading data
@@ -153,13 +156,13 @@
             report.find("tbody").prepend(body);
            
             for (var char in result.chars) {
-                body = "<tr><td>"+char+"</td>";
+                body = "<tr><td style='position: sticky;'>"+char+"</td>";
 
                 for (var ships in result.chars[char]) {
                     if (result.chars[char][ships].ship == true) {
-                        body = body + "<td style='text-align: center; width: 10em;'><span class='badge badge-success'>HULL</span> / ";
+                        body = body + "<td style='text-align: center; width: 10em; min-width: 95px;'><span class='badge badge-success'>HULL</span> / ";
                     } else {
-                        body = body + "<td style='text-align: center; width: 10em;'><span class='badge badge-danger'>HULL</span> / ";
+                        body = body + "<td style='text-align: center; width: 10em; min-width: 95px;'><span class='badge badge-danger'>HULL</span> / ";
                     }
 
                     if (result.chars[char][ships].fit == true) {
@@ -179,7 +182,20 @@
             //
             $('#reportbox').show();
 
-            button.find('span').removeClass('fa-spin');
+            // table = report.DataTable({
+            //     scrollX: true,
+            //     // scrollY: "300px",
+            //     scrollCollapse: true,
+            //     paging: false,
+            //     fixedColumns: true
+            // });
+
+            button.html(
+                `<span class="fa fa-sync"></span>
+                    Run Report
+                </button>`
+            );
+            button.prop("disabled", false);
         });
     });
 </script>
