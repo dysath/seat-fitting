@@ -108,6 +108,7 @@
         $('#reportbox').hide();
 
         $('#missing_warn').addClass('d-none');
+        button.removeClass("bg-danger")
 
         //
         // in case datatable has already been set, ensure data are cleared from cache and destroy the instance
@@ -129,82 +130,103 @@
             timeout: 60000
         }).done( function (result) {
 
-            if (Object.keys(result.fittings).length != (Object.keys(result.totals).length - 1)) {
-                $('#missing_warn').removeClass('d-none');
-            }
+            try {
 
-            header = "";
-
-            for (fit in result.fittings) {
-
-                header = header + "<th style='text-align: center'>" + result.fittings[fit] + "</th>";
-            }
-
-            header = header + "</tr>";
-
-            report.find("thead").append("<tr><th>Character</th>" + header);
-
-            body = "<tr><td><label>HULL  /  FIT Totals</label></td>";
-
-            for (total in result.totals) {
-                if (result.totals[total].ship == null) {
-                    result.totals[total].ship = 0;
+                if (Object.keys(result.fittings).length != (Object.keys(result.totals).length - 1)) {
+                    $('#missing_warn').removeClass('d-none');
                 }
 
-                if (result.totals[total].fit == null) {
-                    result.totals[total].fit = 0;
+                header = "";
+
+                for (fit in result.fittings) {
+
+                    header = header + "<th style='text-align: center'>" + result.fittings[fit] + "</th>";
                 }
 
-                if (total !== "chars") {
-                    body = body + "<td style='text-align: center; width: 10em;'>" + result.totals[total].ship + "  /  " + result.totals[total].fit + "<br/>";
-                    body = body + Math.round((result.totals[total].ship / result.totals['chars'])*100) + "%  /  " + Math.round((result.totals[total].fit / result.totals['chars'])*100) + "%</td>";
-                } 
-              
-            }
+                header = header + "</tr>";
 
-            report.find("tbody").prepend(body);
-           
-            for (var char in result.chars) {
-                body = "<tr><td style='position: sticky;'>"+char+"</td>";
+                report.find("thead").append("<tr><th>Character</th>" + header);
 
-                for (var ships in result.chars[char]) {
-                    if (result.chars[char][ships].ship == true) {
-                        body = body + "<td style='text-align: center; width: 10em; min-width: 95px;'><span class='badge badge-success'>HULL</span> / ";
-                    } else {
-                        body = body + "<td style='text-align: center; width: 10em; min-width: 95px;'><span class='badge badge-danger'>HULL</span> / ";
+                body = "<tr><td><label>HULL  /  FIT Totals</label></td>";
+
+                for (total in result.totals) {
+                    if (result.totals[total].ship == null) {
+                        result.totals[total].ship = 0;
                     }
 
-                    if (result.chars[char][ships].fit == true) {
-                        body = body + "<span class='badge badge-success'>FIT</span></td>";
-                    } else {
-                        body = body + "<span class='badge badge-danger'>FIT</span></td>";
+                    if (result.totals[total].fit == null) {
+                        result.totals[total].fit = 0;
                     }
+
+                    if (total !== "chars") {
+                        body = body + "<td style='text-align: center; width: 10em;'>" + result.totals[total].ship + "  /  " + result.totals[total].fit + "<br/>";
+                        body = body + Math.round((result.totals[total].ship / result.totals['chars'])*100) + "%  /  " + Math.round((result.totals[total].fit / result.totals['chars'])*100) + "%</td>";
+                    } 
+                
                 }
 
-                body = body + "</tr>";
+                report.find("tbody").prepend(body);
+            
+                for (var char in result.chars) {
+                    body = "<tr><td style='position: sticky;'>"+char+"</td>";
 
-                report.find("tbody").append(body);
+                    for (var ships in result.chars[char]) {
+                        if (result.chars[char][ships].ship == true) {
+                            body = body + "<td style='text-align: center; width: 10em; min-width: 95px;'><span class='badge badge-success'>HULL</span> / ";
+                        } else {
+                            body = body + "<td style='text-align: center; width: 10em; min-width: 95px;'><span class='badge badge-danger'>HULL</span> / ";
+                        }
+
+                        if (result.chars[char][ships].fit == true) {
+                            body = body + "<span class='badge badge-success'>FIT</span></td>";
+                        } else {
+                            body = body + "<span class='badge badge-danger'>FIT</span></td>";
+                        }
+                    }
+
+                    body = body + "</tr>";
+
+                    report.find("tbody").append(body);
+                }
+
+                //
+                // show report content
+                //
+                $('#reportbox').show();
+
+                // table = report.DataTable({
+                //     scrollX: true,
+                //     // scrollY: "300px",
+                //     scrollCollapse: true,
+                //     paging: false,
+                //     fixedColumns: true
+                // });
+
+                button.html(
+                    `<span class="fa fa-sync"></span>
+                        Run Report
+                    </button>`
+                );
+                button.prop("disabled", false);
+
+            } catch (error) {
+                button.html(
+                    `<span class="fa fa-sync"></span>
+                        Run Report (Last Report Failed)
+                    </button>`
+                );
+                button.addClass("bg-danger")
+                button.prop("disabled", false);              
             }
-
-            //
-            // show report content
-            //
-            $('#reportbox').show();
-
-            // table = report.DataTable({
-            //     scrollX: true,
-            //     // scrollY: "300px",
-            //     scrollCollapse: true,
-            //     paging: false,
-            //     fixedColumns: true
-            // });
-
+        })
+        .fail(function() {
             button.html(
-                `<span class="fa fa-sync"></span>
-                    Run Report
-                </button>`
-            );
-            button.prop("disabled", false);
+                    `<span class="fa fa-sync"></span>
+                        Run Report (Last Report Timed Out)
+                    </button>`
+                );
+                button.addClass("bg-danger")
+                button.prop("disabled", false);  
         });
     });
 </script>
