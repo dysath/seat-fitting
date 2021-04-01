@@ -90,6 +90,11 @@
 
     $( document ).ready(function() {
         $('#reportbox').hide();
+
+        $('#alliances').select2({sorter: data => data.sort((a, b) => a.text.localeCompare(b.text)),});
+        $('#corporations').select2({sorter: data => data.sort((a, b) => a.text.localeCompare(b.text)),});
+        $('#doctrines').select2({sorter: data => data.sort((a, b) => a.text.localeCompare(b.text)),});
+
     });
 
     button.on('click', function () {
