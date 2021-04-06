@@ -32,7 +32,7 @@
           </select>
           <div class="input-group-btn">
               @can('fitting.create')
-              @if (!empty($doctrine_list)))
+              @if (!empty($doctrine_list))
                 <button type="button" id="editDoctrine" class="btn btn-warning" disabled="disabled" data-id="" data-toggle="modal" data-target="#addDoctrine" data-toggle="tooltip" data-placement="top" title="Edit Doctrine" inactive>
                     <span class="fas fa-edit text-white"></span>
                 </button>
