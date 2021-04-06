@@ -5,6 +5,8 @@ namespace Denngarr\Seat\Fitting\Http\Controllers;
 use Illuminate\Support\Facades\Gate;
 use Seat\Web\Http\Controllers\Controller;
 use Seat\Web\Models\Acl\Role;
+use Illuminate\Http\Request;
+use GuzzleHttp\Client;
 use Seat\Eveapi\Models\Alliances\Alliance;
 use Seat\Eveapi\Models\Alliances\AllianceMember;
 use Seat\Eveapi\Models\Character\CharacterInfo;
@@ -193,6 +195,30 @@ class FittingController extends Controller implements CalculateConstants
         $fitting = Fitting::find($id);
 
         return $fitting->eftfitting;
+    }
+
+    public function getFittingCostById($id)
+    {
+        $fit = Fitting::find($id);
+
+        // $eft = implode("\n", $fit->eftfitting);
+        
+        $response = (new Client())
+            ->request('POST', 'http://evepraisal.com/appraisal.json?market=jita&persist=no', [
+                'multipart' => [
+                    [
+                        'name' => 'uploadappraisal',
+                        'contents' => $fit->eftfitting,
+                        'filename' => 'notme',
+                        'headers' => [
+                            'Content-Type' => 'text/plain',
+                            'User-Agent' => 'seat-srp'
+                        ]
+                    ],
+                ]
+            ]);
+
+        return response()->json(json_decode($response->getBody()->getContents()));
     }
 
     public function getFittingById($id)

@@ -69,6 +69,12 @@
         <div class="card-body">
             <textarea name="showeft" id="showeft" rows="15" style="width: 100%" onclick="this.focus();this.select()" readonly="readonly"></textarea>
         </div>
+        <div class="card-footer">
+        Current Jita Price (Buy /Sell)
+        <a id="current_appraisal" class="float-right">
+        ?/? (ISK)
+        </a>
+        </div>
     </div>
 
     <div class="modal fade" tabindex="-1" role="dialog" id="fitEditModal">
@@ -283,6 +289,23 @@
                 }
 
                 fillSkills(result);
+            }
+        });
+
+        $.ajax({
+            headers :function () {
+            },
+            url: "/fitting/getfittingcostbyid/"+$(this).data('id'),
+            type: "GET",
+            dataType: 'json',
+            timeout: 10000
+
+        }).done( function (result) {
+            if (result){
+                $buy = result.appraisal.totals.buy.toLocaleString();
+                $sell = result.appraisal.totals.sell.toLocaleString();
+                
+                $('#current_appraisal').html($buy + " / " + $sell + " (ISK)");
             }
         });
     });
