@@ -179,12 +179,16 @@ class FittingController extends Controller implements CalculateConstants
         foreach ($fittings as $fit) {
             $ship = InvType::where('typeName', $fit->shiptype)->first();
 
-            array_push($fitnames, [
-                'id' => $fit->id,
-                'shiptype' => $fit->shiptype,
-                'fitname' => $fit->fitname,
-                'typeID' => $ship->typeID
-            ]);
+            if ($ship && property_exists($ship, 'typeID')) {
+                array_push($fitnames, [
+                    'id' => $fit->id,
+                    'shiptype' => $fit->shiptype,
+                    'fitname' => $fit->fitname,
+                    'typeID' => $ship->typeID
+                ]);
+            } else {
+                $this->deleteFittingById($fit->id);
+            }
         }
 
         return $fitnames;
