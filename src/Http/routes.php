@@ -7,19 +7,19 @@ Route::group([
 ], function () {
     Route::get('/fitting/list', [
         'as' => 'fitting.api.web.fitting.list',
-        'uses' => 'ApiFittingController.php@getFittingList',
+        'uses' => 'ApiFittingController@getFittingList',
     ]);
     Route::get('/fitting/get/{id}', [
         'as' => 'fitting.api.web.fitting.get',
-        'uses' => 'ApiFittingController.php@getFittingById',
+        'uses' => 'ApiFittingController@getFittingById',
     ]);
     Route::get('/doctrine/list', [
         'as' => 'fitting.api.web.doctrine.list',
-        'uses' => 'ApiFittingController.php@getDoctrineList',
+        'uses' => 'ApiFittingController@getDoctrineList',
     ]);
     Route::get('/doctrine/get/{id}', [
         'as' => 'fitting.api.web.doctrine.get',
-        'uses' => 'ApiFittingController.php@getDoctrineById',
+        'uses' => 'ApiFittingController@getDoctrineById',
     ]);
 });
 
