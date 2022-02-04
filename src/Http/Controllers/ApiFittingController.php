@@ -3,11 +3,11 @@
 namespace Denngarr\Seat\Fitting\Http\Controllers;
 
 use Seat\Api\Http\Controllers\Api\v2\ApiController;
-use Seat\Web\Http\Controllers\FittingController;
+use Denngarr\Seat\Fitting\Http\Controllers\FittingController;
 
 /**
  * Class ApiFittingController.
- * @package Denngarr\Seat\SeatSrp\Http\Controllers
+ * @package Denngarr\Seat\Fitting\Http\Controllers
  */
 class ApiFittingController extends ApiController
 {
