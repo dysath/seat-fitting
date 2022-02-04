@@ -2,6 +2,29 @@
 
 Route::group([
     'namespace' => 'Denngarr\Seat\Fitting\Http\Controllers',
+    'middleware' => ['web', 'auth'],
+    'prefix' => 'api/v2/fitting/web',
+], function () {
+    Route::get('/fitting/list', [
+        'as' => 'fitting.api.web.fitting.list',
+        'uses' => 'ApiFittingController.php@getFittingList',
+    ]);
+    Route::get('/fitting/get/{id}', [
+        'as' => 'fitting.api.web.fitting.get',
+        'uses' => 'ApiFittingController.php@getFittingById',
+    ]);
+    Route::get('/doctrine/list', [
+        'as' => 'fitting.api.web.doctrine.list',
+        'uses' => 'ApiFittingController.php@getDoctrineList',
+    ]);
+    Route::get('/doctrine/get/{id}', [
+        'as' => 'fitting.api.web.doctrine.get',
+        'uses' => 'ApiFittingController.php@getDoctrineById',
+    ]);
+});
+
+Route::group([
+    'namespace' => 'Denngarr\Seat\Fitting\Http\Controllers',
     'prefix' => 'fitting'
 ], function () {
     Route::group([
