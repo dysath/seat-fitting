@@ -3,7 +3,7 @@
 namespace Denngarr\Seat\SeatSrp\Http\Controllers;
 
 use Seat\Api\Http\Controllers\Api\v2\ApiController;
-use Seat\Web\Http\Controllers\FittingController.php;
+use Seat\Web\Http\Controllers\FittingController;
 
 /**
  * Class ApiFittingController.
