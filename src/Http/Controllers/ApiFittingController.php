@@ -1,6 +1,6 @@
 <?php
 
-namespace Denngarr\Seat\SeatSrp\Http\Controllers;
+namespace Denngarr\Seat\Fitting\Http\Controllers;
 
 use Seat\Api\Http\Controllers\Api\v2\ApiController;
 use Seat\Web\Http\Controllers\FittingController;
