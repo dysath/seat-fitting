@@ -93,7 +93,7 @@ Route::group([
             'uses' => 'FittingController@viewDoctrineReport',
             'middleware' => 'can:fitting.reportview'
         ]);
-        Route::get('/runReport/{allianceid}/{corpid}/{doctrineid}', [
+        Route::get('/runReport/{allianceid}/{corpid}/{charid}/{doctrineid}', [
             'as'   => 'fitting.runreport',
             'uses' => 'FittingController@runReport',
             'middleware' => 'can:fitting.reportview'

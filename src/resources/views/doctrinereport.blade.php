@@ -42,6 +42,17 @@
             </div>
             <div class="col-md-6 col-lg-3">
                 <div class="form-group">
+                    <label for="characters">Characters:</label>
+                    <select id="characters" class="form-control">
+                        <option value="0">---</option>
+                        @foreach ($chars as $char)
+                        <option value="{{ $char->character_id }}">{{ $char->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="form-group">
                     <label for="doctrines">Doctrine:</label>
                     <select id="doctrines" class="form-control">
                         @foreach ($doctrines as $doctrine)
@@ -94,14 +105,14 @@
         $('#alliances').select2({sorter: data => data.sort((a, b) => a.text.localeCompare(b.text)),});
         $('#corporations').select2({sorter: data => data.sort((a, b) => a.text.localeCompare(b.text)),});
         $('#doctrines').select2({sorter: data => data.sort((a, b) => a.text.localeCompare(b.text)),});
-
+        $('#characters').select2({sorter: data => data.sort((a, b) => a.text.localeCompare(b.text)),});
     });
 
     button.on('click', function () {
         allianceid = $('#alliances').find(":selected").val();
         corpid = $('#corporations').find(":selected").val();
         doctrineid = $('#doctrines').find(":selected").val();
-
+        charid = $('#characters').find(":selected").val();
         button.prop("disabled", true);
         button.html(
             `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...`
@@ -129,7 +140,7 @@
         $.ajax({
             headers: function () {
             },
-            url: "/fitting/runReport/" + allianceid + "/" + corpid + "/" + doctrineid,
+            url: "/fitting/runReport/" + allianceid + "/" + corpid + "/" + charid + "/" +  doctrineid,
             type: "GET",
             datatype: 'json',
             timeout: 60000

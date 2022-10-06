@@ -473,6 +473,7 @@ class FittingController extends Controller implements CalculateConstants
     {
         $doctrines = Doctrine::all();
         $corps = CorporationInfo::all();
+        $chars = CharacterInfo::select('character_infos.*');
         $alliances = array();
 
         $allids = array();
@@ -485,10 +486,10 @@ class FittingController extends Controller implements CalculateConstants
 
         $alliances = Alliance::whereIn('alliance_id', $allids)->get();
 
-        return view('fitting::doctrinereport', compact('doctrines', 'corps', 'alliances'));
+        return view('fitting::doctrinereport', compact('doctrines', 'corps', 'alliances', 'chars'));
     }
 
-    public function runReport($alliance_id, $corp_id, $doctrine_id)
+    public function runReport($alliance_id, $corp_id, $char_id, $doctrine_id)
     {
         $characters = collect();
 
@@ -498,6 +499,8 @@ class FittingController extends Controller implements CalculateConstants
                 $affiliation->where('alliance_id', $alliance_id);
             })->get();
             $characters = $characters->concat($chars);
+        } else if ($char_id !== '0') {
+            $characters = CharacterInfo::with('skills')->where('character_id', $char_id)->get();
         } else {
             $characters = CharacterInfo::with('skills')->whereHas('affiliation', function ($affiliation) use ($corp_id) {
                 $affiliation->where('corporation_id', $corp_id);
@@ -512,6 +515,7 @@ class FittingController extends Controller implements CalculateConstants
         $data = [];
         $data['fittings'] = [];
         $data['totals'] = [];
+
         foreach ($characters as $character) {
             $charData[$character->character_id]['name'] = $character->name;
             $charData[$character->character_id]['skills'] = [];
