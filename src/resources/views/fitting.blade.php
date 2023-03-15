@@ -68,6 +68,7 @@
         </div>
         <div class="card-body">
             <textarea name="showeft" id="showeft" rows="15" style="width: 100%" onclick="this.focus();this.select()" readonly="readonly"></textarea>
+            <div id="exportLinks" class="mt-2 list-group"></div>
         </div>
         <div class="card-footer">
         Current Jita Price (Buy /Sell)
@@ -215,6 +216,7 @@
     $('#fitting-box').hide();
     $('#skills-box').hide();
     $('#eftexport').hide();
+    $('#exportLinks').hide();
     $('#showeft').val('');
 
     $('#fitlist').DataTable();
@@ -264,6 +266,11 @@
                 .empty();
             $('#showeft').val('');
             $('#fitting-box').show();
+
+            $('#exportLinks').show().empty();
+            for(const link of result.exportLinks){
+                $('#exportLinks').append(`<a href="${link.url}" class="list-group-item list-group-item-action">${link.name}</a>`)
+            }
 
             fillFittingWindow(result);
         });
