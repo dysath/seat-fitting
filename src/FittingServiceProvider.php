@@ -17,6 +17,10 @@ class FittingServiceProvider extends AbstractSeatPlugin
         $this->add_views();
         $this->add_translations();
 
+        $this->publishes([
+            __DIR__.'/Config/fitting.exportlinks.php' => config_path('fitting.exportlinks.php')],["config","seat"]
+        );
+
         $this->addMigrations();
     }
 

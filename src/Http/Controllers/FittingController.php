@@ -225,7 +225,16 @@ class FittingController extends Controller implements CalculateConstants
     {
         $fitting = Fitting::find($id);
 
-        return response()->json($this->fittingParser($fitting->eftfitting));
+        $response = $this->fittingParser($fitting->eftfitting);
+
+        $response["exportLinks"] = collect(config("fitting.exportlinks"))->map(function ($link) use ($fitting) {
+            return [
+                "name"=>$link["name"],
+                "url"=>isset($link["url"]) ? $link["url"]."?id=$fitting->id" : route($link["route"],["id"=>$fitting->id])
+            ];
+        })->values();
+
+        return response()->json($response);
     }
 
     public function getFittingView()
