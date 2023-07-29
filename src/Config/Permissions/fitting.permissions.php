@@ -26,4 +26,9 @@ return [
         'description' => 'View Reports',
         'division' => 'military'
     ],
+    'settings' => [
+        'label' => 'Settings',
+        'description' => 'Settings',
+        'division' => 'military'
+    ],
 ];
