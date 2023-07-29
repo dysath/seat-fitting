@@ -5,6 +5,7 @@ return [
     'action' => 'Request Status',
 
     'about' => 'About',
-    'fitting' => 'Fitting'
+    'fitting' => 'Fitting',
+    'settings' => 'Settings'
 ];
 

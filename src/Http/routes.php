@@ -40,6 +40,16 @@ Route::group([
             'uses' => 'FittingController@getAboutView',
             'middleware' => 'can:fitting.view'
         ]);
+        Route::get('/settings', [
+            'as'   => 'fitting.settings',
+            'uses' => 'FittingController@getSettings',
+            'middleware' => 'can:fitting.settings'
+        ]);
+        Route::post('/settings', [
+            'as'   => 'fitting.saveSettings',
+            'uses' => 'FittingController@saveSettings',
+            'middleware' => 'can:fitting.settings'
+        ]);
         Route::post('/postfitting', [
             'as'   => 'fitting.postFitting',
             'uses' => 'FittingController@postFitting',

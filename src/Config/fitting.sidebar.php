@@ -35,6 +35,13 @@ return [
                 'route' => 'fitting.about',
                 'permission' => 'fitting.view'
             ],
+            'settings' => [
+                'name' => 'Settings',
+                'icon' => 'fas fa-cog',
+                'route_segment' => 'fitting',
+                'route' => 'fitting.settings',
+                'permission' => 'fitting.settings'
+            ],
         ]
     ]
 ];

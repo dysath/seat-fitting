@@ -28,6 +28,20 @@ class FittingController extends Controller implements CalculateConstants
 
     private $requiredSkills = [];
 
+    public function getSettings(){
+        return view("fitting::settings");
+    }
+
+    public function saveSettings(Request $request){
+        $request->validate([
+            "evepraisal" => "required|string"
+        ]);
+
+        setting(["fitting.evepraisal.domain", $request->evepraisal], true);
+
+        return redirect()->back()->with("success","Updated settings");
+    }
+
     public function getDoctrineEdit($doctrine_id)
     {
         $selected = [];
@@ -202,9 +216,10 @@ class FittingController extends Controller implements CalculateConstants
         $fit = Fitting::find($id);
 
         // $eft = implode("\n", $fit->eftfitting);
+        $evepraisal = setting("fitting.evepraisal.domain", true);
         
         $response = (new Client())
-            ->request('POST', 'http://evepraisal.com/appraisal.json?market=jita&persist=no', [
+            ->request('POST', "https://$evepraisal/appraisal.json?market=jita&persist=no", [
                 'multipart' => [
                     [
                         'name' => 'uploadappraisal',
