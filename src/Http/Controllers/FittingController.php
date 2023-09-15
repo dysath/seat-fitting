@@ -42,7 +42,7 @@ class FittingController extends Controller implements CalculateConstants
         return redirect()->back()->with("success","Updated settings");
     }
 
-    public function getDoctrineEdit($doctrine_id)
+    public function getDoctrineEdit($doctrine_id): array
     {
         $selected = [];
         $unselected = [];
@@ -52,7 +52,7 @@ class FittingController extends Controller implements CalculateConstants
         $doctrine_fittings = Doctrine::find($doctrine_id)->fittings()->get();
 
         foreach ($doctrine_fittings as $doctrine_fitting) {
-            array_push($doctrine_fits, $doctrine_fitting->id);
+            $doctrine_fits[] = $doctrine_fitting->id;
         }
 
         foreach ($fittings as $fitting) {
@@ -65,10 +65,10 @@ class FittingController extends Controller implements CalculateConstants
                 'typeID' => $ship->typeID,
             ];
 
-            if (array_search($fitting->id, $doctrine_fits) !== false) {
-                array_push($selected, $entry);
+            if (in_array($fitting->id, $doctrine_fits)) {
+                $selected[] = $entry;
             } else {
-                array_push($unselected, $entry);
+                $unselected[] = $entry;
             }
         }
 
@@ -80,7 +80,10 @@ class FittingController extends Controller implements CalculateConstants
         ];
     }
 
-    public function getDoctrineList()
+    /**
+     * @return array<mixed, array<'id'|'name', mixed>>
+     */
+    public function getDoctrineList(): array
     {
         $doctrine_names = [];
 
@@ -89,17 +92,20 @@ class FittingController extends Controller implements CalculateConstants
         if (count($doctrines) > 0) {
 
             foreach ($doctrines as $doctrine) {
-                array_push($doctrine_names, [
+                $doctrine_names[] = [
                     'id' => $doctrine->id,
                     'name' => $doctrine->name,
-                ]);
+                ];
             }
         }
 
         return $doctrine_names;
     }
 
-    public function getDoctrineById($id)
+    /**
+     * @return array<mixed, array<'id'|'name'|'shipImg'|'shipType', mixed>>
+     */
+    public function getDoctrineById($id): array
     {
         $fitting_list = [];
 
@@ -109,32 +115,32 @@ class FittingController extends Controller implements CalculateConstants
         foreach ($fittings as $fitting) {
             $ship = InvType::where('typeName', $fitting->shiptype)->first();
 
-            array_push($fitting_list, [
+            $fitting_list[] = [
                 'id' => $fitting->id,
                 'name' => $fitting->fitname,
                 'shipType' => $fitting->shiptype,
                 'shipImg' => $ship->typeID,
-            ]);
+            ];
         }
 
         return $fitting_list;
     }
 
-    public function delDoctrineById($id)
+    public function delDoctrineById($id): string
     {
         Doctrine::destroy($id);
 
         return "Success";
     }
 
-    public function deleteFittingById($id)
+    public function deleteFittingById($id): string
     {
         Fitting::destroy($id);
 
         return "Success";
     }
 
-    public function getSkillsByFitId($id)
+    public function getSkillsByFitId($id): string
     {
         $characters = [];
         $skillsToons = [];
@@ -172,7 +178,7 @@ class FittingController extends Controller implements CalculateConstants
             }
         }
 
-        return json_encode($skillsToons);
+        return json_encode($skillsToons, JSON_THROW_ON_ERROR);
     }
 
     protected function getFittings()
@@ -180,25 +186,28 @@ class FittingController extends Controller implements CalculateConstants
         return Fitting::all();
     }
 
-    public function getFittingList()
+    /**
+     * @return mixed[]
+     */
+    public function getFittingList(): array
     {
         $fitnames = [];
         $alliance_corps = [];
 
         $fittings = $this->getFittings();
 
-        if (count($fittings) <= 0)
+        if ((is_countable($fittings) ? count($fittings) : 0) <= 0)
             return $fitnames;
 
         foreach ($fittings as $fit) {
             $ship = InvType::where('typeName', $fit->shiptype)->first();
 
-            array_push($fitnames, [
+            $fitnames[] = [
                 'id' => $fit->id,
                 'shiptype' => $fit->shiptype,
                 'fitname' => $fit->fitname,
                 'typeID' => $ship->typeID
-            ]);
+            ];
         }
 
         return $fitnames;
@@ -233,7 +242,7 @@ class FittingController extends Controller implements CalculateConstants
                 ]
             ]);
 
-        return response()->json(json_decode($response->getBody()->getContents()));
+        return response()->json(json_decode($response->getBody()->getContents(), null, 512, JSON_THROW_ON_ERROR));
     }
 
     public function getFittingById($id)
@@ -242,12 +251,10 @@ class FittingController extends Controller implements CalculateConstants
 
         $response = $this->fittingParser($fitting->eftfitting);
 
-        $response["exportLinks"] = collect(config("fitting.exportlinks"))->map(function ($link) use ($fitting) {
-            return [
-                "name"=>$link["name"],
-                "url"=>isset($link["url"]) ? $link["url"]."?id=$fitting->id" : route($link["route"],["id"=>$fitting->id])
-            ];
-        })->values();
+        $response["exportLinks"] = collect(config("fitting.exportlinks"))->map(fn($link): array => [
+            "name"=>$link["name"],
+            "url"=>isset($link["url"]) ? $link["url"]."?id=$fitting->id" : route($link["route"],["id"=>$fitting->id])
+        ])->values();
 
         return response()->json($response);
     }
@@ -268,14 +275,14 @@ class FittingController extends Controller implements CalculateConstants
             $corps[$corp->corporation_id] = $corp->name;
         }
 
-        return view('fitting::fitting', compact('fitlist', 'corps'));
+        return view('fitting::fitting', ['fitlist' => $fitlist, 'corps' => $corps]);
     }
 
     public function getDoctrineView()
     {
         $doctrine_list = $this->getDoctrineList();
 
-        return view('fitting::doctrine', compact('doctrine_list'));
+        return view('fitting::doctrine', ['doctrine_list' => $doctrine_list]);
     }
 
     public function getAboutView()
@@ -291,14 +298,14 @@ class FittingController extends Controller implements CalculateConstants
             $fitting = Fitting::find($request->fitSelection);
         }
 
-        $eft = explode("\n", $request->eftfitting);
-        list($fitting->shiptype, $fitting->fitname) = explode(", ", substr($eft[0], 1, -2));
+        $eft = explode("\n", (string) $request->eftfitting);
+        [$fitting->shiptype, $fitting->fitname] = explode(", ", substr($eft[0], 1, -2));
         $fitting->eftfitting = $request->eftfitting;
         $fitting->save();
 
         $fitlist = $this->getFittingList();
 
-        return view('fitting::fitting', compact('fitlist'));
+        return view('fitting::fitting', ['fitlist' => $fitlist]);
     }
 
     public function postFitting(FittingValidation $request)
@@ -312,18 +319,18 @@ class FittingController extends Controller implements CalculateConstants
     private function fittingParser($eft)
     {
         $jsfit = [];
-        $data = preg_split("/\r?\n\r?\n/", $eft);
+        $data = preg_split("/\r?\n\r?\n/", (string) $eft);
         $jsfit['eft'] = $eft;
 
         $header = preg_split("/\r?\n/", $data[0]);
 
-        list($jsfit['shipname'], $jsfit['fitname']) = explode(",", substr($header[0], 1, -1));
+        [$jsfit['shipname'], $jsfit['fitname']] = explode(",", substr($header[0], 1, -1));
         array_shift($header);
         $data[0] = implode("\r\n", $header);
 
         // Deal with a blank line between the name and the first low slot    
         $lowslot = array_filter(preg_split("/\r?\n/", $data[0]));
-        if (empty($lowslot)) {
+        if ($lowslot === []) {
             $data = array_splice($data, 1, count($data));
         }
 
@@ -336,7 +343,7 @@ class FittingController extends Controller implements CalculateConstants
         if (count($data) > 4) {
             //Deal with extra blank line between rigs and drones
             $drones = array_filter(preg_split("/\r?\n/", $data[4]));
-            if (empty($drones)) {
+            if ($drones === []) {
                 $data = array_splice($data, 1, count($data));
                 $drones = array_filter(preg_split("/\r?\n/", $data[4]));
             }
@@ -366,7 +373,7 @@ class FittingController extends Controller implements CalculateConstants
 
         if (isset($drones)) {
             foreach ($drones as $slot) {
-                list($drone, $qty) = explode(" x", $slot);
+                [$drone, $qty] = explode(" x", $slot);
                 $item = InvType::where('typeName', $drone)->first();
 
                 $jsfit['dronebay'][$item->typeID] = [
@@ -378,12 +385,12 @@ class FittingController extends Controller implements CalculateConstants
         return $jsfit;
     }
 
-    private function loadSlot(&$jsfit, $slotname, $slots)
+    private function loadSlot(array &$jsfit, string $slotname, array $slots): void
     {
         $index = 0;
 
         foreach ($slots as $slot) {
-            $module = explode(",", $slot);
+            $module = explode(",", (string) $slot);
 
             if (!preg_match("/\[Empty .+ slot\]/", $module[0])) {
                 $item = InvType::where('typeName', $module[0])->first();
@@ -451,7 +458,10 @@ class FittingController extends Controller implements CalculateConstants
         return response()->json($skillsToons);
     }
 
-    private function getSkillNames($types)
+    /**
+     * @return array<mixed, array<'level'|'typeId'|'typeName', mixed>>
+     */
+    private function getSkillNames($types): array
     {
         $skills = [];
 
@@ -497,19 +507,19 @@ class FittingController extends Controller implements CalculateConstants
     {
         $doctrines = Doctrine::all();
         $corps = CorporationInfo::all();
-        $alliances = array();
+        $alliances = [];
 
-        $allids = array();
+        $allids = [];
 
         foreach ($corps as $corp) {
             if (!is_null($corp->alliance_id)) {
-                array_push($allids, $corp->alliance_id);
+                $allids[] = $corp->alliance_id;
             }
         }
 
         $alliances = Alliance::whereIn('alliance_id', $allids)->get();
 
-        return view('fitting::doctrinereport', compact('doctrines', 'corps', 'alliances'));
+        return view('fitting::doctrinereport', ['doctrines' => $doctrines, 'corps' => $corps, 'alliances' => $alliances]);
     }
 
     public function runReport($alliance_id, $corp_id, $doctrine_id)
@@ -518,12 +528,12 @@ class FittingController extends Controller implements CalculateConstants
 
         if ($alliance_id !== '0') {
 
-            $chars = CharacterInfo::with('skills')->whereHas('affiliation', function ($affiliation) use ($alliance_id) {
+            $chars = CharacterInfo::with('skills')->whereHas('affiliation', function ($affiliation) use ($alliance_id): void {
                 $affiliation->where('alliance_id', $alliance_id);
             })->get();
             $characters = $characters->concat($chars);
         } else {
-            $characters = CharacterInfo::with('skills')->whereHas('affiliation', function ($affiliation) use ($corp_id) {
+            $characters = CharacterInfo::with('skills')->whereHas('affiliation', function ($affiliation) use ($corp_id): void {
                 $affiliation->where('corporation_id', $corp_id);
             })->get();
         }
@@ -548,7 +558,7 @@ class FittingController extends Controller implements CalculateConstants
         foreach ($fittings as $fitting) {
             $fit = Fitting::find($fitting->id);
 
-            array_push($data['fittings'], $fit->fitname);
+            $data['fittings'][] = $fit->fitname;
 
             $this->requiredSkills = [];
             $shipSkills = $this->calculate("[" . $fit->shiptype . ", a]");

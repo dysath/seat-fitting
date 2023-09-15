@@ -13,7 +13,8 @@
             "email": "crypta@crypta.tech"
         }
     ],
-    "minimum-stability": "stable",
+    "minimum-stability": "dev",
+    "prefer-stable": true,
     "autoload": {
         "psr-4": {
             "Denngarr\\Seat\\Fitting\\": "src/"
@@ -27,9 +28,12 @@
         }
     },
     "require": {
-        "eveseat/services": "^4.1",
-        "eveseat/eveapi": "^4.0",
-        "eveseat/web": "^4.0"
+        "eveseat/services": "^5.0",
+        "eveseat/eveapi": "^5.0",
+        "eveseat/web": "^5.0"
+    },
+    "require-dev": {
+        "rector/rector": "^0.18.3",
+        "driftingly/rector-laravel": "^0.24.1"
     }
 }
-
