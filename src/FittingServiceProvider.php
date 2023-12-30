@@ -11,7 +11,7 @@ class FittingServiceProvider extends AbstractSeatPlugin
      *
      * @return void
      */
-    public function boot()
+    public function boot(): void
     {
         $this->add_routes();
         $this->add_views();
@@ -27,14 +27,14 @@ class FittingServiceProvider extends AbstractSeatPlugin
     /**
      * Include the routes.
      */
-    public function add_routes()
+    public function add_routes(): void
     {
         if (! $this->app->routesAreCached()) {
             include __DIR__ . '/Http/routes.php';
         }
     }
 
-    public function add_translations()
+    public function add_translations(): void
     {
         $this->loadTranslationsFrom(__DIR__ . '/lang', 'fitting');
     }
@@ -42,7 +42,7 @@ class FittingServiceProvider extends AbstractSeatPlugin
     /**
      * Set the path and namespace for the views.
      */
-    public function add_views()
+    public function add_views(): void
     {
         $this->loadViewsFrom(__DIR__ . '/resources/views', 'fitting');
     }
@@ -52,7 +52,7 @@ class FittingServiceProvider extends AbstractSeatPlugin
      *
      * @return void
      */
-    public function register()
+    public function register(): void
     {
         $this->mergeConfigFrom(
             __DIR__ . '/Config/fitting.config.php', 'fitting.config');
@@ -66,12 +66,12 @@ class FittingServiceProvider extends AbstractSeatPlugin
             __DIR__ . '/Config/Permissions/fitting.permissions.php', 'fitting');
     }
 
-    private function addMigrations()
+    private function addMigrations(): void
     {
         $this->loadMigrationsFrom(__DIR__ . '/database/migrations/');
     }
 
-    private function addCommands()
+    private function addCommands(): void
     {
     }
 

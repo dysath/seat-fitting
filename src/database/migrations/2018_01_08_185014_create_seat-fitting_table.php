@@ -11,9 +11,9 @@ class CreateSeatFittingTable extends Migration
      *
      * @return void
      */
-    public function up()
+    public function up(): void
     {
-        Schema::create('seat_fitting', function (Blueprint $table) {
+        Schema::create('seat_fitting', function (Blueprint $table): void {
             $table->increments('id');
             $table->string('shiptype');
             $table->string('fitname');
@@ -27,7 +27,7 @@ class CreateSeatFittingTable extends Migration
      *
      * @return void
      */
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('seat_fitting');
     }

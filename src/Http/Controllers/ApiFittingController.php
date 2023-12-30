@@ -11,25 +11,24 @@ use Denngarr\Seat\Fitting\Http\Controllers\FittingController;
  */
 class ApiFittingController extends ApiController
 {
-  
-  public function getFittingList()
+
+    public function getFittingList()
     {
-    return FittingController::getFittingList()
-  }
-  
-  public function getFittingById($id)
+        return (new FittingController())->getFittingList();
+    }
+
+    public function getFittingById($id)
     {
-    return FittingController::getFittingById($id)
-  }
-  
-  public function getDoctrineList()
+        return (new FittingController())->getFittingById($id);
+    }
+
+    public function getDoctrineList()
     {
-    return FittingController::getDoctrineList()
-  }
-  
-  public function getDoctrineList($id)
+        return (new FittingController())->getDoctrineList();
+    }
+
+    public function getDoctrineById($id)
     {
-    return FittingController::getDoctrineById($id)
-  }
-  
+        return (new FittingController())->getDoctrineById($id);
+    }
 }

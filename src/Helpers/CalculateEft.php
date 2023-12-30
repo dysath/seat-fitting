@@ -24,7 +24,7 @@ trait CalculateEft
         return $this->getSkillNames($this->requiredSkills);
     }
 
-    private function modifyRequiredSkills($fitting)
+    private function modifyRequiredSkills($fitting): void
     {
         // skip this, if dogma extension isn't loaded
         if (!extension_loaded('dogma')) {
@@ -46,7 +46,7 @@ trait CalculateEft
 
         // add modules
         foreach ($fitting as $item) {
-            dogma_add_module_s($this->ctx, $item, $key, DOGMA_STATE_Active);
+            dogma_add_module_s($this->ctx, $item, $key, \DOGMA_STATE_ACTIVE);
         }
 
         // raise CPU skills
@@ -102,9 +102,9 @@ trait CalculateEft
         return self::RAISE_ALREADY_FULLFILLED;
     }
 
-    private function getReqSkillsByTypeIDs($typeIDs)
+    private function getReqSkillsByTypeIDs($typeIDs): void
     {
-        $attributeids = array_merge(array_keys(self::REQ_SKILLS_ATTR_LEVELS), array_values(self::REQ_SKILLS_ATTR_LEVELS));
+        $attributeids = [...array_keys(self::REQ_SKILLS_ATTR_LEVELS), ...array_values(self::REQ_SKILLS_ATTR_LEVELS)];
 
         foreach ($typeIDs as $type) {
             $res = DgmTypeAttribute::where('typeid', $type['typeID'])->wherein('attributeID', $attributeids)->get();
@@ -119,7 +119,7 @@ trait CalculateEft
         }
     }
 
-    private function findSubRequiredSkills($skills)
+    private function findSubRequiredSkills($skills): void
     {
         $toFind = [];
 
@@ -130,7 +130,7 @@ trait CalculateEft
         $this->getReqSkillsByTypeIDs($toFind);
     }
 
-    private function buildMinRequiredSkills($toAdd)
+    private function buildMinRequiredSkills($toAdd): void
     {
         foreach ($toAdd as $skill => $level) {
             if (! isset($this->requiredSkills[$skill]) || $this->requiredSkills[$skill] < $level) {
@@ -139,14 +139,17 @@ trait CalculateEft
         }
     }
 
-    private function prepareRequiredSkills($attributes)
+    /**
+     * @return mixed[]
+     */
+    private function prepareRequiredSkills($attributes): array
     {
         $skills = [];
         $keys = [];
 
         // build an array of attributes
         foreach ($attributes as $attribute) {
-            $attribValue = $attribute['valueInt'] !== null ? $attribute['valueInt'] : $attribute['valueFloat'];
+            $attribValue = $attribute['valueInt'] ?? $attribute['valueFloat'];
             $keys[$attribute['attributeID']] = $attribValue;
         }
 
@@ -160,13 +163,13 @@ trait CalculateEft
         return $skills;
     }
 
-    private function parseEftFitting($fitting)
+    private function parseEftFitting($fitting): array
     {
         $fitting = $this->sanatizeFittingBlock($fitting);
-        $fitsplit = explode("\n", $fitting);
+        $fitsplit = explode("\n", (string) $fitting);
 
         // get shipname of first line by removing brackets
-        list($shipname, $fitname) = explode(", ", substr(array_shift($fitsplit), 1, -1));
+        [$shipname, $fitname] = explode(", ", substr(array_shift($fitsplit), 1, -1));
 
         $fit_all_items = [];
         $fit_calc_items = [];
@@ -201,7 +204,7 @@ trait CalculateEft
         return InvType::wherein('typeName', $items)->get();
     }
 
-    private function convertToTypeIDs($items)
+    private function convertToTypeIDs(array $items): array
     {
         foreach ($items as $key => $item) {
             $items[$key] = InvType::where('typeName', $item)->first()->id;
@@ -210,19 +213,19 @@ trait CalculateEft
         return $items;
     }
 
-    private function sanatizeFittingBlock($fitting)
+    private function sanatizeFittingBlock($fitting): string
     {
         // remove useless empty lines and whatnot
-        $fitting = preg_replace("/\[Empty .+ slot\]/", "", $fitting);
+        $fitting = preg_replace("/\[Empty .+ slot\]/", "", (string) $fitting);
 
         return ltrim(rtrim(preg_replace("/^[ \t]*[\r\n]+/m", "", $fitting)));
     }
 
-    private function sanatizeTypeName($item)
+    private function sanatizeTypeName($item): string
     {
         // remove amount for charges
         // sample: Scourge Rage Heavy Assault Missile x66
-        return ltrim(rtrim(preg_replace("/ x\d+/", "", $item)));
+        return ltrim(rtrim(preg_replace("/ x\d+/", "", (string) $item)));
     }
 
 };

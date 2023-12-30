@@ -4,7 +4,7 @@ Route::group([
     'namespace' => 'Denngarr\Seat\Fitting\Http\Controllers',
     'middleware' => ['web', 'auth'],
     'prefix' => 'api/v2/fitting/web',
-], function () {
+], function (): void {
     Route::get('/fitting/list', [
         'as' => 'fitting.api.web.fitting.list',
         'uses' => 'ApiFittingController@getFittingList',
@@ -26,10 +26,10 @@ Route::group([
 Route::group([
     'namespace' => 'Denngarr\Seat\Fitting\Http\Controllers',
     'prefix' => 'fitting'
-], function () {
+], function (): void {
     Route::group([
         'middleware' => ['web', 'auth'],
-    ], function () {
+    ], function (): void {
         Route::get('/', [
             'as'   => 'fitting.view',
             'uses' => 'FittingController@getFittingView',
